@@ -9,7 +9,8 @@
     "dev": "elm reactor",
     "test": "elm-test-rs",
     "review": "elm-review --fix-all",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "commit": "gitmoji -c"
   },
   "devDependencies": {
     "elm": "^0.19.1-5",
