@@ -1,33 +1,54 @@
 module MainTests exposing (..)
 
-import ProgramTest exposing (ProgramTest, expectViewHas, expectViewHasNot, fillIn)
-import Test exposing (..)
-import Test.Html.Selector exposing (text)
+import Effect exposing (Effect(..))
+import Expect
 import Main as Main
+import ProgramTest exposing (..)
+import SimulatedEffect.Cmd
+import SimulatedEffect.Navigation
+import Test exposing (..)
 
 
-start : ProgramTest Main.Model Main.Msg (Cmd Main.Msg)
+baseUrl : String
+baseUrl =
+    "https://xpp.fr"
+
+
+start : ProgramTest (Main.Model ()) Main.Msg (Effect Main.Msg)
 start =
-    ProgramTest.createDocument
+    createApplication
         { init = Main.init
         , update = Main.update
         , view = Main.view
+        , onUrlChange = Main.UrlChanged
+        , onUrlRequest = Main.LinkClicked
         }
+        |> withSimulatedEffects simulateEffects
+        -- |> ProgramTest.withSimulatedSubscriptions simulateSub
+        |> withBaseUrl baseUrl
         |> ProgramTest.start ()
+
+
+simulateEffects : Effect Main.Msg -> ProgramTest.SimulatedEffect Main.Msg
+simulateEffects effect =
+    case effect of
+        None ->
+            SimulatedEffect.Cmd.none
+
+        PushUrl url ->
+            SimulatedEffect.Navigation.pushUrl url
+
+        LoadUrl url ->
+            SimulatedEffect.Navigation.load url
 
 
 all : Test
 all =
     describe "App"
-        [ test "Nickname" <|
-            \() ->
-                start
-                    |> fillIn "nickname" "Nickname" "Miss Goldman"
-                    |> expectViewHas
-                        [ text "Welcome Miss Goldman"
-                        ]
-        , test "no welcome message is displayed at the beginning" <|
-            \() ->
-                start
-                    |> expectViewHasNot [ text "Welcome" ]
+        [ describe "Home"
+            [ test "Join a room" <|
+                \() ->
+                    start
+                        |> expectBrowserUrl (Expect.equal <| baseUrl ++ "/")
+            ]
         ]

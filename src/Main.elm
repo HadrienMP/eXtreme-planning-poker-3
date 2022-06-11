@@ -1,43 +1,86 @@
 module Main exposing (..)
 
-import Browser
+import Browser exposing (UrlRequest)
+import Browser.Navigation exposing (Key)
+import Effect exposing (Effect)
 import Element
 import Element.Input
 import Html.Attributes
+import Url exposing (Url)
+
+
+type alias Flags =
+    ()
+
+
+main : Program Flags (Model Key) Msg
+main =
+    Browser.application
+        { init = \flags url key -> init flags url key |> Tuple.mapSecond (Effect.perform key)
+        , view = view
+        , update = \msg model -> update msg model |> Tuple.mapSecond (Effect.perform model.key)
+        , subscriptions = \_ -> Sub.none
+        , onUrlChange = UrlChanged
+        , onUrlRequest = LinkClicked
+        }
+
+
+
+-- Init
+
+
+type alias Model navigationKey =
+    { nickname : String
+    , key : navigationKey
+    , url : Url
+    }
+
+
+init : Flags -> Url -> navigationKey -> ( Model navigationKey, Effect Msg )
+init _ url key =
+    ( { nickname = ""
+      , url = url
+      , key = key
+      }
+    , Effect.none
+    )
+
+
+
+-- Update
 
 
 type Msg
     = NicknameChanged String
+    | UrlChanged Url
+    | LinkClicked UrlRequest
 
 
-type alias Model =
-    { nickname : String
-    }
-
-
-main : Program () Model Msg
-main =
-    Browser.document
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = \_ -> Sub.none
-        }
-
-
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( { nickname = "" }, Cmd.none )
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model key -> ( Model key, Effect Msg )
 update msg model =
     case msg of
         NicknameChanged nick ->
-            ( { model | nickname = nick }, Cmd.none )
+            ( { model | nickname = nick }, Effect.none )
+
+        LinkClicked urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model, Effect.pushUrl (Url.toString url) )
+
+                Browser.External href ->
+                    ( model, Effect.load href )
+
+        UrlChanged url ->
+            ( { model | url = url }
+            , Effect.none
+            )
 
 
-view : Model -> Browser.Document Msg
+
+-- View
+
+
+view : Model key -> Browser.Document Msg
 view model =
     { title = "App"
     , body =
