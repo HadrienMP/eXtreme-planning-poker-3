@@ -112,13 +112,13 @@ homeView model =
             { onChange = NicknameChanged
             , text = model.nickname
             , label = Element.Input.labelHidden "Nickname"
-            , placeholder = Nothing
+            , placeholder = Just <| Element.Input.placeholder [] <| Element.text "Nickname"
             }
         , Element.Input.text [ Element.htmlAttribute <| Html.Attributes.id "room" ]
             { onChange = RoomNameChanged
             , text = model.room
             , label = Element.Input.labelHidden "Room"
-            , placeholder = Nothing
+            , placeholder = Just <| Element.Input.placeholder [] <| Element.text "Room"
             }
         , Element.link []
             { url = "/room/" ++ model.room
