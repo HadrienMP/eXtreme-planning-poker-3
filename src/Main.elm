@@ -6,7 +6,9 @@ import Effect exposing (Effect)
 import Element
 import Element.Input
 import Html.Attributes
+import Routes exposing (Route(..), parseRoute)
 import Url exposing (Url)
+import Url.Parser exposing ((</>), oneOf)
 
 
 type alias Flags =
@@ -91,24 +93,36 @@ view model =
     { title = "App"
     , body =
         [ Element.layout [] <|
-            Element.column []
-                [ if model.nickname /= "" then
-                    Element.text <| "Welcome " ++ model.nickname
+            case parseRoute model.url of
+                Home ->
+                    homeView model
 
-                  else
-                    Element.none
-                , Element.Input.text [ Element.htmlAttribute <| Html.Attributes.id "nickname" ]
-                    { onChange = NicknameChanged
-                    , text = model.nickname
-                    , label = Element.Input.labelHidden "Nickname"
-                    , placeholder = Nothing
-                    }
-                , Element.Input.text [ Element.htmlAttribute <| Html.Attributes.id "room" ]
-                    { onChange = RoomNameChanged
-                    , text = model.room
-                    , label = Element.Input.labelHidden "Room"
-                    , placeholder = Nothing
-                    }
-                ]
+                Room room ->
+                    Element.text <| "room: " ++ room
+
+                NotFound ->
+                    Element.text "Not found" 
         ]
     }
+
+
+homeView : Model key -> Element.Element Msg
+homeView model =
+    Element.column []
+        [ Element.Input.text [ Element.htmlAttribute <| Html.Attributes.id "nickname" ]
+            { onChange = NicknameChanged
+            , text = model.nickname
+            , label = Element.Input.labelHidden "Nickname"
+            , placeholder = Nothing
+            }
+        , Element.Input.text [ Element.htmlAttribute <| Html.Attributes.id "room" ]
+            { onChange = RoomNameChanged
+            , text = model.room
+            , label = Element.Input.labelHidden "Room"
+            , placeholder = Nothing
+            }
+        , Element.link []
+            { url = "/room/" ++ model.room
+            , label = Element.text <| "Join"
+            }
+        ]

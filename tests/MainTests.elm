@@ -6,6 +6,7 @@ import Html exposing (Html)
 import Html.Attributes
 import Main as Main
 import ProgramTest exposing (..)
+import Routes exposing (Route)
 import SimulatedEffect.Cmd
 import SimulatedEffect.Navigation
 import Test exposing (..)
@@ -18,8 +19,8 @@ baseUrl =
     "https://xpp.fr"
 
 
-start : ProgramTest (Main.Model ()) Main.Msg (Effect Main.Msg)
-start =
+start : Route -> ProgramTest (Main.Model ()) Main.Msg (Effect Main.Msg)
+start route =
     createApplication
         { init = Main.init
         , update = Main.update
@@ -29,7 +30,7 @@ start =
         }
         |> withSimulatedEffects simulateEffects
         -- |> ProgramTest.withSimulatedSubscriptions simulateSub
-        |> withBaseUrl baseUrl
+        |> withBaseUrl (baseUrl ++ Routes.toString route)
         |> ProgramTest.start ()
 
 
@@ -50,9 +51,9 @@ all : Test
 all =
     describe "App"
         [ describe "Home"
-            [ test "Join a room" <|
+            [ test "Fill in the home fields" <|
                 \() ->
-                    start
+                    start Routes.Home
                         |> fillIn "room" "Room" "dabest"
                         |> fillIn "nickname" "Nickname" "Joba"
                         |> expectViewHas
@@ -61,9 +62,20 @@ all =
                                 , Selector.attribute (Html.Attributes.value "dabest")
                                 ]
                             , Selector.all
-                                [ Selector.id "nickname"
-                                , Selector.attribute (Html.Attributes.value "Joba")
-                                ]
+                                [ Selector.id "nickname", Selector.attribute (Html.Attributes.value "Joba") ]
                             ]
+            , test "Clicking on join redirects you to the room you chose" <|
+                \() ->
+                    start Routes.Home
+                        |> fillIn "room" "Room" "dabest"
+                        |> fillIn "nickname" "Nickname" "Joba"
+                        |> clickLink "Join" "/room/dabest"
+                        |> expectPageChange (baseUrl ++ "/room/dabest")
+            ]
+        , describe "Room"
+            [ test "Base display" <|
+                \() ->
+                    start (Routes.Room "dabest")
+                        |> expectViewHas [ Selector.text "room: dabest" ]
             ]
         ]
