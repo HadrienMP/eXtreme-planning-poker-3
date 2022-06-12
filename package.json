@@ -5,18 +5,20 @@
   "license": "MIT",
   "scripts": {
     "postinstall": "elm-tooling install && husky install",
-    "build": "elm make src/ExampleMain.elm --output=public/dist/elm.js",
-    "dev": "elm reactor",
+    "build": "parcel build public/index.html",
+    "dev": "parcel public/index.html",
     "test": "elm-test-rs",
     "review": "elm-review --fix-all"
   },
   "devDependencies": {
+    "@parcel/transformer-elm": "2.6.0",
     "elm": "^0.19.1-5",
     "elm-review": "^2.7.2",
     "elm-test": "^0.19.1-revision7",
     "elm-tooling": "^1.8.0",
     "gitmoji-cli": "^5.0.1",
-    "husky": "^8.0.1"
+    "husky": "^8.0.1",
+    "parcel": "^2.6.0"
   },
   "dependencies": {}
 }
