@@ -8,7 +8,6 @@ import Element.Input
 import Html.Attributes
 import Routes exposing (Route(..), parseRoute)
 import Url exposing (Url)
-import Url.Parser exposing ((</>), oneOf)
 
 
 type alias Flags =
@@ -101,7 +100,7 @@ view model =
                     Element.text <| "room: " ++ room
 
                 NotFound ->
-                    Element.text "Not found" 
+                    Element.text "Not found"
         ]
     }
 

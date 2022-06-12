@@ -1,16 +1,13 @@
 module MainTests exposing (..)
 
 import Effect exposing (Effect(..))
-import Expect
-import Html exposing (Html)
 import Html.Attributes
-import Main as Main
+import Main
 import ProgramTest exposing (..)
 import Routes exposing (Route)
 import SimulatedEffect.Cmd
 import SimulatedEffect.Navigation
 import Test exposing (..)
-import Test.Html.Query as Query
 import Test.Html.Selector as Selector
 
 
