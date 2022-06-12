@@ -8,8 +8,7 @@
     "build": "elm make src/ExampleMain.elm --output=public/dist/elm.js",
     "dev": "elm reactor",
     "test": "elm-test-rs",
-    "review": "elm-review --fix-all",
-    "prepare": "husky install"
+    "review": "elm-review --fix-all"
   },
   "devDependencies": {
     "elm": "^0.19.1-5",
