@@ -31,6 +31,7 @@ main =
 
 type alias Model navigationKey =
     { nickname : String
+    , room : String
     , key : navigationKey
     , url : Url
     }
@@ -39,6 +40,7 @@ type alias Model navigationKey =
 init : Flags -> Url -> navigationKey -> ( Model navigationKey, Effect Msg )
 init _ url key =
     ( { nickname = ""
+      , room = ""
       , url = url
       , key = key
       }
@@ -52,6 +54,7 @@ init _ url key =
 
 type Msg
     = NicknameChanged String
+    | RoomNameChanged String
     | UrlChanged Url
     | LinkClicked UrlRequest
 
@@ -61,6 +64,9 @@ update msg model =
     case msg of
         NicknameChanged nick ->
             ( { model | nickname = nick }, Effect.none )
+
+        RoomNameChanged room ->
+            ( { model | room = room }, Effect.none )
 
         LinkClicked urlRequest ->
             case urlRequest of
@@ -95,6 +101,12 @@ view model =
                     { onChange = NicknameChanged
                     , text = model.nickname
                     , label = Element.Input.labelHidden "Nickname"
+                    , placeholder = Nothing
+                    }
+                , Element.Input.text [ Element.htmlAttribute <| Html.Attributes.id "room" ]
+                    { onChange = RoomNameChanged
+                    , text = model.room
+                    , label = Element.Input.labelHidden "Room"
                     , placeholder = Nothing
                     }
                 ]

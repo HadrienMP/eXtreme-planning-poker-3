@@ -2,11 +2,15 @@ module MainTests exposing (..)
 
 import Effect exposing (Effect(..))
 import Expect
+import Html exposing (Html)
+import Html.Attributes
 import Main as Main
 import ProgramTest exposing (..)
 import SimulatedEffect.Cmd
 import SimulatedEffect.Navigation
 import Test exposing (..)
+import Test.Html.Query as Query
+import Test.Html.Selector as Selector
 
 
 baseUrl : String
@@ -49,6 +53,17 @@ all =
             [ test "Join a room" <|
                 \() ->
                     start
-                        |> expectBrowserUrl (Expect.equal <| baseUrl ++ "/")
+                        |> fillIn "room" "Room" "dabest"
+                        |> fillIn "nickname" "Nickname" "Joba"
+                        |> expectViewHas
+                            [ Selector.all
+                                [ Selector.id "room"
+                                , Selector.attribute (Html.Attributes.value "dabest")
+                                ]
+                            , Selector.all
+                                [ Selector.id "nickname"
+                                , Selector.attribute (Html.Attributes.value "Joba")
+                                ]
+                            ]
             ]
         ]
