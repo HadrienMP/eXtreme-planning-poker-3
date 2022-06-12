@@ -48,12 +48,12 @@ all : Test
 all =
     describe "App"
         [ describe "Home"
-            [ test "Fill in the home fields" <|
+            [ test "Clicking on join redirects you to the room you chose" <|
                 \() ->
                     start Routes.Home
                         |> fillIn "room" "Room" "dabest"
                         |> fillIn "nickname" "Nickname" "Joba"
-                        |> expectViewHas
+                        |> ensureViewHas
                             [ Selector.all
                                 [ Selector.id "room"
                                 , Selector.attribute (Html.Attributes.value "dabest")
@@ -61,18 +61,17 @@ all =
                             , Selector.all
                                 [ Selector.id "nickname", Selector.attribute (Html.Attributes.value "Joba") ]
                             ]
-            , test "Clicking on join redirects you to the room you chose" <|
-                \() ->
-                    start Routes.Home
-                        |> fillIn "room" "Room" "dabest"
-                        |> fillIn "nickname" "Nickname" "Joba"
                         |> clickLink "Join" "/room/dabest"
                         |> expectPageChange (baseUrl ++ "/room/dabest")
             ]
         , describe "Room"
-            [ test "Base display" <|
+            [ test "the room name is displayed on the page" <|
                 \() ->
                     start (Routes.Room "dabest")
                         |> expectViewHas [ Selector.text "room: dabest" ]
+            , test "spaces are allowed in the room name" <|
+                \() ->
+                    start (Routes.Room "dabest heyhey")
+                        |> expectViewHas [ Selector.text "room: dabest heyhey" ]
             ]
         ]
