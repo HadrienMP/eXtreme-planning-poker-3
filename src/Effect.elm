@@ -3,13 +3,13 @@ module Effect exposing (..)
 import Browser.Navigation
 
 
-type Effect msg
+type Effect
     = None
     | PushUrl String
     | LoadUrl String
 
 
-perform : Browser.Navigation.Key -> Effect msg -> Cmd msg
+perform : Browser.Navigation.Key -> Effect -> Cmd msg
 perform key effect =
     case effect of
         None ->
@@ -22,20 +22,21 @@ perform key effect =
             Browser.Navigation.load url
 
 
-none : Effect msg
+none : Effect
 none =
     None
+
 
 
 
 -- Navigation
 
 
-pushUrl : String -> Effect msg
+pushUrl : String -> Effect
 pushUrl =
     PushUrl
 
 
-load : String -> Effect msg
+load : String -> Effect
 load =
     LoadUrl

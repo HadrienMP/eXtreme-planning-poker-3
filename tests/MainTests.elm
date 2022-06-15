@@ -1,6 +1,7 @@
 module MainTests exposing (..)
 
 import Effect exposing (Effect(..))
+import Expect
 import Html.Attributes
 import Main
 import ProgramTest exposing (..)
@@ -13,10 +14,10 @@ import Test.Html.Selector as Selector
 
 baseUrl : String
 baseUrl =
-    "https://xpp.fr"
+    "http://xpp.fr"
 
 
-start : Route -> ProgramTest (Main.Model ()) Main.Msg (Effect Main.Msg)
+start : Route -> ProgramTest (Main.Model ()) Main.Msg Effect
 start route =
     createApplication
         { init = Main.init
@@ -31,7 +32,7 @@ start route =
         |> ProgramTest.start ()
 
 
-simulateEffects : Effect Main.Msg -> ProgramTest.SimulatedEffect Main.Msg
+simulateEffects : Effect -> ProgramTest.SimulatedEffect Main.Msg
 simulateEffects effect =
     case effect of
         None ->
@@ -42,6 +43,11 @@ simulateEffects effect =
 
         LoadUrl url ->
             SimulatedEffect.Navigation.load url
+
+
+andExpectPageChange : Route -> ProgramTest model msg effect -> Expect.Expectation
+andExpectPageChange route =
+    expectPageChange <| baseUrl ++ Routes.toString route
 
 
 all : Test
@@ -73,5 +79,19 @@ all =
                 \() ->
                     start (Routes.Room "dabest heyhey")
                         |> expectViewHas [ Selector.text "room: dabest heyhey" ]
+            , test "the current username is displayed on the page" <|
+                \() ->
+                    start Routes.Home
+                        |> fillIn "room" "Room" "dabest"
+                        |> fillIn "nickname" "Nickname" "Joba"
+                        |> routeChange (Routes.toString <| Routes.Room "dabest")
+                        |> ensureViewHas [ Selector.text "deck of Joba" ]
+                        |> done
+            , test "a guest arriving in a room is displayed the nickname field" <|
+                \() ->
+                    start (Routes.Room "dabest")
+                        |> ensureViewHasNot [ Selector.text "deck of Joba" ]
+                        |> ensureViewHas [ Selector.id "nickname" ]
+                        |> done
             ]
         ]

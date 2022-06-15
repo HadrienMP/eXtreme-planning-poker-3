@@ -4,9 +4,11 @@ import Browser exposing (UrlRequest)
 import Browser.Navigation exposing (Key)
 import Effect exposing (Effect)
 import Element
-import Element.Input
-import Html.Attributes
-import Routes exposing (Route(..), parseRoute)
+import Pages.Home
+import Routes
+import Shared
+import Theme.Input
+import UpdateResult exposing (UpdateResult)
 import Url exposing (Url)
 
 
@@ -30,23 +32,42 @@ main =
 -- Init
 
 
+type Page
+    = Home Pages.Home.Model
+    | Room String
+    | NotFound
+
+
 type alias Model navigationKey =
-    { nickname : String
-    , room : String
-    , key : navigationKey
+    { key : navigationKey
     , url : Url
+    , page : Page
+    , shared : Shared.Model
     }
 
 
-init : Flags -> Url -> navigationKey -> ( Model navigationKey, Effect Msg )
+init : Flags -> Url -> navigationKey -> ( Model navigationKey, Effect )
 init _ url key =
-    ( { nickname = ""
-      , room = ""
-      , url = url
+    ( { url = url
       , key = key
+      , shared = Shared.init
+      , page = pageFrom url
       }
     , Effect.none
     )
+
+
+pageFrom : Url -> Page
+pageFrom url =
+    case Routes.parseRoute url of
+        Routes.Home ->
+            Home <| Pages.Home.init
+
+        Routes.Room room ->
+            Room room
+
+        Routes.NotFound ->
+            NotFound
 
 
 
@@ -54,22 +75,20 @@ init _ url key =
 
 
 type Msg
-    = NicknameChanged String
-    | RoomNameChanged String
+    = GotHomeMsg Pages.Home.Msg
     | UrlChanged Url
     | LinkClicked UrlRequest
+    | GotSharedMsg Shared.Msg
 
 
-update : Msg -> Model key -> ( Model key, Effect Msg )
+update : Msg -> Model key -> ( Model key, Effect )
 update msg model =
-    case msg of
-        NicknameChanged nick ->
-            ( { model | nickname = nick }, Effect.none )
+    case ( model.page, msg ) of
+        ( Home homeModel, GotHomeMsg homeMsg ) ->
+            Pages.Home.update model.shared homeMsg homeModel
+                |> mapToModelAndEffect model Home
 
-        RoomNameChanged room ->
-            ( { model | room = room }, Effect.none )
-
-        LinkClicked urlRequest ->
+        ( _, LinkClicked urlRequest ) ->
             case urlRequest of
                 Browser.Internal url ->
                     ( model, Effect.pushUrl (Url.toString url) )
@@ -77,10 +96,27 @@ update msg model =
                 Browser.External href ->
                     ( model, Effect.load href )
 
-        UrlChanged url ->
-            ( { model | url = url }
+        ( _, UrlChanged url ) ->
+            ( { model | url = url, page = pageFrom url }
             , Effect.none
             )
+
+        ( _, GotSharedMsg sharedMsg ) ->
+            Shared.update sharedMsg model.shared
+                |> Tuple.mapFirst (\shared -> { model | shared = shared })
+
+        _ ->
+            ( model, Effect.none )
+
+
+mapToModelAndEffect : Model key -> (pageModel -> Page) -> UpdateResult pageModel -> ( Model key, Effect )
+mapToModelAndEffect model page result =
+    ( { model
+        | page = page result.model
+        , shared = result.shared
+      }
+    , result.effect
+    )
 
 
 
@@ -92,12 +128,13 @@ view model =
     { title = "App"
     , body =
         [ Element.layout [] <|
-            case parseRoute model.url of
-                Home ->
-                    homeView model
+            case model.page of
+                Home homeModel ->
+                    Pages.Home.view model.shared homeModel
+                        |> Element.map GotHomeMsg
 
                 Room room ->
-                    Element.text <| "room: " ++ room
+                    roomView model room
 
                 NotFound ->
                     Element.text "Not found"
@@ -105,23 +142,17 @@ view model =
     }
 
 
-homeView : Model key -> Element.Element Msg
-homeView model =
+roomView : Model key -> String -> Element.Element Msg
+roomView model room =
     Element.column []
-        [ Element.Input.text [ Element.htmlAttribute <| Html.Attributes.id "nickname" ]
-            { onChange = NicknameChanged
-            , text = model.nickname
-            , label = Element.Input.labelHidden "Nickname"
-            , placeholder = Just <| Element.Input.placeholder [] <| Element.text "Nickname"
-            }
-        , Element.Input.text [ Element.htmlAttribute <| Html.Attributes.id "room" ]
-            { onChange = RoomNameChanged
-            , text = model.room
-            , label = Element.Input.labelHidden "Room"
-            , placeholder = Just <| Element.Input.placeholder [] <| Element.text "Room"
-            }
-        , Element.link []
-            { url = "/room/" ++ model.room
-            , label = Element.text <| "Join"
-            }
+        [ Element.text <| "room: " ++ room
+        , if model.shared.nickname == "" then
+            Theme.Input.text
+                { label = "Nickname"
+                , onChange = GotSharedMsg << Shared.NicknameChanged
+                , value = model.shared.nickname
+                }
+
+          else
+            Element.text <| "deck of " ++ model.shared.nickname
         ]
