@@ -10,6 +10,7 @@ import SimulatedEffect.Cmd
 import SimulatedEffect.Navigation
 import Test exposing (..)
 import Test.Html.Selector as Selector
+import Utils exposing (inRoom)
 
 
 baseUrl : String
@@ -72,26 +73,30 @@ all =
             ]
         , describe "Room"
             [ test "the room name is displayed on the page" <|
-                \() ->
-                    start (Routes.Room "dabest")
-                        |> expectViewHas [ Selector.text "room: dabest" ]
+                inRoom "dabest" <|
+                    \room ->
+                        start room
+                            |> expectViewHas [ Selector.text "room: dabest" ]
             , test "spaces are allowed in the room name" <|
-                \() ->
-                    start (Routes.Room "dabest heyhey")
-                        |> expectViewHas [ Selector.text "room: dabest heyhey" ]
+                inRoom "dabest heyhey" <|
+                    \room ->
+                        start room
+                            |> expectViewHas [ Selector.text "room: dabest heyhey" ]
             , test "the current username is displayed on the page" <|
-                \() ->
-                    start Routes.Home
-                        |> fillIn "room" "Room" "dabest"
-                        |> fillIn "nickname" "Nickname" "Joba"
-                        |> routeChange (Routes.toString <| Routes.Room "dabest")
-                        |> ensureViewHas [ Selector.text "deck of Joba" ]
-                        |> done
+                inRoom "dabest" <|
+                    \room ->
+                        start Routes.Home
+                            |> fillIn "room" "Room" "dabest"
+                            |> fillIn "nickname" "Nickname" "Joba"
+                            |> routeChange (Routes.toString room)
+                            |> ensureViewHas [ Selector.text "deck of Joba" ]
+                            |> done
             , test "a guest arriving in a room is displayed the nickname field" <|
-                \() ->
-                    start (Routes.Room "dabest")
-                        |> ensureViewHasNot [ Selector.text "deck of Joba" ]
-                        |> ensureViewHas [ Selector.id "nickname" ]
-                        |> done
+                inRoom "dabest heyhey" <|
+                    \room ->
+                        start room
+                            |> ensureViewHasNot [ Selector.text "deck of Joba" ]
+                            |> ensureViewHas [ Selector.id "nickname" ]
+                            |> done
             ]
         ]

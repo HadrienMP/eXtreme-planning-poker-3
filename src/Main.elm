@@ -5,9 +5,9 @@ import Browser.Navigation exposing (Key)
 import Effect exposing (Effect)
 import Element
 import Pages.Home
+import Pages.Room
 import Routes
 import Shared
-import Theme.Input
 import UpdateResult exposing (UpdateResult)
 import Url exposing (Url)
 
@@ -34,7 +34,7 @@ main =
 
 type Page
     = Home Pages.Home.Model
-    | Room String
+    | Room Pages.Room.Model
     | NotFound
 
 
@@ -61,10 +61,10 @@ pageFrom : Url -> Page
 pageFrom url =
     case Routes.parseRoute url of
         Routes.Home ->
-            Home <| Pages.Home.init
+            Home Pages.Home.init
 
         Routes.Room room ->
-            Room room
+            Room <| Pages.Room.init room
 
         Routes.NotFound ->
             NotFound
@@ -76,9 +76,9 @@ pageFrom url =
 
 type Msg
     = GotHomeMsg Pages.Home.Msg
+    | GotRoomMsg Pages.Room.Msg
     | UrlChanged Url
     | LinkClicked UrlRequest
-    | GotSharedMsg Shared.Msg
 
 
 update : Msg -> Model key -> ( Model key, Effect )
@@ -87,6 +87,10 @@ update msg model =
         ( Home homeModel, GotHomeMsg homeMsg ) ->
             Pages.Home.update model.shared homeMsg homeModel
                 |> mapToModelAndEffect model Home
+
+        ( Room roomModel, GotRoomMsg roomMsg ) ->
+            Pages.Room.update model.shared roomMsg roomModel
+                |> mapToModelAndEffect model Room
 
         ( _, LinkClicked urlRequest ) ->
             case urlRequest of
@@ -100,10 +104,6 @@ update msg model =
             ( { model | url = url, page = pageFrom url }
             , Effect.none
             )
-
-        ( _, GotSharedMsg sharedMsg ) ->
-            Shared.update sharedMsg model.shared
-                |> Tuple.mapFirst (\shared -> { model | shared = shared })
 
         _ ->
             ( model, Effect.none )
@@ -133,26 +133,11 @@ view model =
                     Pages.Home.view model.shared homeModel
                         |> Element.map GotHomeMsg
 
-                Room room ->
-                    roomView model room
+                Room roomModel ->
+                    Pages.Room.view model.shared roomModel
+                        |> Element.map GotRoomMsg
 
                 NotFound ->
                     Element.text "Not found"
         ]
     }
-
-
-roomView : Model key -> String -> Element.Element Msg
-roomView model room =
-    Element.column []
-        [ Element.text <| "room: " ++ room
-        , if model.shared.nickname == "" then
-            Theme.Input.text
-                { label = "Nickname"
-                , onChange = GotSharedMsg << Shared.NicknameChanged
-                , value = model.shared.nickname
-                }
-
-          else
-            Element.text <| "deck of " ++ model.shared.nickname
-        ]

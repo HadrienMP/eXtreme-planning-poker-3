@@ -2,6 +2,7 @@ module Pages.Home exposing (..)
 
 import Effect
 import Element exposing (Element)
+import RoomName
 import Routes
 import Shared
 import Theme.Element
@@ -66,8 +67,14 @@ view shared model =
             , onChange = RoomNameChanged
             , value = model.room
             }
-        , Theme.Element.link
-            { route = Routes.Room model.room
-            , label = "Join"
-            }
+        , model.room
+            |> RoomName.fromString
+            |> Maybe.map
+                (\roomName ->
+                    Theme.Element.link
+                        { route = Routes.Room roomName
+                        , label = "Join"
+                        }
+                )
+            |> Maybe.withDefault Element.none
         ]
