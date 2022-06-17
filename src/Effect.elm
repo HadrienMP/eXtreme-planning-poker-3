@@ -1,6 +1,7 @@
 module Effect exposing (..)
 
 import Browser.Navigation
+import Routes exposing (Route)
 
 
 type Effect
@@ -35,8 +36,16 @@ none =
 pushUrl : String -> Effect
 pushUrl =
     PushUrl
+pushRoute : Route -> Effect
+pushRoute route =
+    PushUrl <| Routes.toString route
 
 
 load : String -> Effect
 load =
     LoadUrl
+
+
+loadRoute : Route -> Effect
+loadRoute route =
+    LoadUrl <| Routes.toString route

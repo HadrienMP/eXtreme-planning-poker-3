@@ -48,23 +48,26 @@ type alias Model navigationKey =
 
 init : Flags -> Url -> navigationKey -> ( Model navigationKey, Effect )
 init _ url key =
+    let
+        shared = Shared.init
+    in
     ( { url = url
       , key = key
-      , shared = Shared.init
-      , page = pageFrom url
+      , shared = shared
+      , page = pageFrom shared url
       }
     , Effect.none
     )
 
 
-pageFrom : Url -> Page
-pageFrom url =
+pageFrom : Shared.Model -> Url -> Page
+pageFrom shared url =
     case Routes.parseRoute url of
         Routes.Home ->
             Home Pages.Home.init
 
         Routes.Room room ->
-            Room <| Pages.Room.init room
+            Room <| Pages.Room.init shared room
 
         Routes.NotFound ->
             NotFound
@@ -86,11 +89,11 @@ update msg model =
     case ( model.page, msg ) of
         ( Home homeModel, GotHomeMsg homeMsg ) ->
             Pages.Home.update model.shared homeMsg homeModel
-                |> mapToModelAndEffect model Home
+                |> handleUpdateResult model Home
 
         ( Room roomModel, GotRoomMsg roomMsg ) ->
             Pages.Room.update model.shared roomMsg roomModel
-                |> mapToModelAndEffect model Room
+                |> handleUpdateResult model Room
 
         ( _, LinkClicked urlRequest ) ->
             case urlRequest of
@@ -101,7 +104,7 @@ update msg model =
                     ( model, Effect.load href )
 
         ( _, UrlChanged url ) ->
-            ( { model | url = url, page = pageFrom url }
+            ( { model | url = url, page = pageFrom model.shared url }
             , Effect.none
             )
 
@@ -109,8 +112,8 @@ update msg model =
             ( model, Effect.none )
 
 
-mapToModelAndEffect : Model key -> (pageModel -> Page) -> UpdateResult pageModel -> ( Model key, Effect )
-mapToModelAndEffect model page result =
+handleUpdateResult : Model key -> (pageModel -> Page) -> UpdateResult pageModel -> ( Model key, Effect )
+handleUpdateResult model page result =
     ( { model
         | page = page result.model
         , shared = result.shared

@@ -68,8 +68,8 @@ all =
                             , Selector.all
                                 [ Selector.id "nickname", Selector.attribute (Html.Attributes.value "Joba") ]
                             ]
-                        |> clickLink "Join" "/room/dabest"
-                        |> expectPageChange (baseUrl ++ "/room/dabest")
+                        |> clickButton "Join"
+                        |> expectBrowserUrl (Expect.equal <| baseUrl ++ "/room/dabest")
             ]
         , describe "Room"
             [ test "the room name is displayed on the page" <|
@@ -83,20 +83,26 @@ all =
                         start room
                             |> expectViewHas [ Selector.text "room: dabest heyhey" ]
             , test "the current username is displayed on the page" <|
-                inRoom "dabest" <|
-                    \room ->
-                        start Routes.Home
-                            |> fillIn "room" "Room" "dabest"
-                            |> fillIn "nickname" "Nickname" "Joba"
-                            |> routeChange (Routes.toString room)
-                            |> ensureViewHas [ Selector.text "deck of Joba" ]
-                            |> done
+                \_ ->
+                    start Routes.Home
+                        |> fillIn "room" "Room" "dabest"
+                        |> fillIn "nickname" "Nickname" "Joba"
+                        |> clickButton "Join"
+                        |> ensureViewHas [ Selector.text "deck of Joba" ]
+                        |> done
             , test "a guest arriving in a room is displayed the nickname field" <|
                 inRoom "dabest heyhey" <|
                     \room ->
                         start room
                             |> ensureViewHasNot [ Selector.text "deck of Joba" ]
-                            |> ensureViewHas [ Selector.id "nickname" ]
+                            |> fillIn "nickname" "Nickname" "Jo"
+                            |> ensureViewHas
+                                [ Selector.id "nickname"
+                                , Selector.attribute (Html.Attributes.value "Jo")
+                                ]
+                            |> fillIn "nickname" "Nickname" "ba"
+                            |> clickButton "Join"
+                            |> ensureViewHas [ Selector.text "deck of ba" ]
                             |> done
             ]
         ]

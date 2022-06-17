@@ -5,9 +5,9 @@ import Element exposing (Element)
 import RoomName
 import Routes
 import Shared
-import Theme.Element
 import Theme.Input
 import UpdateResult exposing (UpdateResult)
+import Element.Input
 
 
 
@@ -36,6 +36,7 @@ init =
 type Msg
     = NicknameChanged String
     | RoomNameChanged String
+    | Join RoomName.RoomName
 
 
 update : Shared.Model -> Msg -> Model -> UpdateResult Model
@@ -46,6 +47,9 @@ update shared msg model =
 
         RoomNameChanged room ->
             { model = { model | room = room }, shared = shared, effect = Effect.none }
+        
+        Join room ->
+            {model = model, shared = shared, effect = Effect.pushRoute <| Routes.Room room}
 
 
 
@@ -71,9 +75,9 @@ view shared model =
             |> RoomName.fromString
             |> Maybe.map
                 (\roomName ->
-                    Theme.Element.link
-                        { route = Routes.Room roomName
-                        , label = "Join"
+                    Element.Input.button []
+                        { onPress = Just <| Join roomName
+                        , label = Element.text "Join"
                         }
                 )
             |> Maybe.withDefault Element.none
