@@ -6,7 +6,9 @@ type RoomName
 
 fromString : String -> Maybe RoomName
 fromString name =
-    Maybe.Just <| RoomName name
+    case name of
+        "" -> Nothing
+        _ -> Just <| RoomName name
 
 print : RoomName -> String
 print roomName =

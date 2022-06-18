@@ -2,12 +2,12 @@ module Pages.Home exposing (..)
 
 import Effect
 import Element exposing (Element)
+import Element.Input
 import RoomName
 import Routes
 import Shared
 import Theme.Input
 import UpdateResult exposing (UpdateResult)
-import Element.Input
 
 
 
@@ -18,12 +18,14 @@ import Element.Input
 
 type alias Model =
     { room : String
+    , roomError : Bool
     }
 
 
 init : Model
 init =
     { room = ""
+    , roomError = False
     }
 
 
@@ -47,9 +49,9 @@ update shared msg model =
 
         RoomNameChanged room ->
             { model = { model | room = room }, shared = shared, effect = Effect.none }
-        
+
         Join room ->
-            {model = model, shared = shared, effect = Effect.pushRoute <| Routes.Room room}
+            { model = model, shared = shared, effect = Effect.pushRoute <| Routes.Room room }
 
 
 
@@ -71,14 +73,11 @@ view shared model =
             , onChange = RoomNameChanged
             , value = model.room
             }
-        , model.room
-            |> RoomName.fromString
-            |> Maybe.map
-                (\roomName ->
-                    Element.Input.button []
-                        { onPress = Just <| Join roomName
-                        , label = Element.text "Join"
-                        }
-                )
-            |> Maybe.withDefault Element.none
+        , Element.Input.button []
+            { onPress =
+                model.room
+                    |> RoomName.fromString
+                    |> Maybe.map Join
+            , label = Element.text "Join"
+            }
         ]
