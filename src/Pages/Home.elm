@@ -36,7 +36,7 @@ init =
 
 
 type Msg
-    = NicknameChanged String
+    = GotSharedMsg Shared.Msg
     | RoomNameChanged String
     | Join RoomName.RoomName
 
@@ -44,14 +44,23 @@ type Msg
 update : Shared.Model -> Msg -> Model -> UpdateResult Model
 update shared msg model =
     case msg of
-        NicknameChanged nickname ->
-            { model = model, shared = { shared | nickname = nickname }, effect = Effect.none }
+        GotSharedMsg sharedMsg ->
+            { model = model
+            , shared = Shared.update sharedMsg shared
+            , effect = Effect.none
+            }
 
         RoomNameChanged room ->
-            { model = { model | room = room }, shared = shared, effect = Effect.none }
+            { model = { model | room = room }
+            , shared = shared
+            , effect = Effect.none
+            }
 
         Join room ->
-            { model = model, shared = shared, effect = Effect.pushRoute <| Routes.Room room }
+            { model = model
+            , shared = Shared.update Shared.Validate shared
+            , effect = Effect.pushRoute <| Routes.Room room
+            }
 
 
 
@@ -63,11 +72,12 @@ update shared msg model =
 view : Shared.Model -> Model -> Element Msg
 view shared model =
     Element.column []
-        [ Theme.Input.text
-            { label = "Nickname"
-            , onChange = NicknameChanged
-            , value = shared.nickname
-            }
+        [ case shared of
+            Shared.SettingUp setupModel ->
+                Shared.view setupModel |> Element.map GotSharedMsg
+
+            _ ->
+                Element.none
         , Theme.Input.text
             { label = "Room"
             , onChange = RoomNameChanged

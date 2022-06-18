@@ -3,9 +3,9 @@ module Pages.Room exposing (..)
 import Effect
 import Element exposing (..)
 import Element.Input
+import Lib.NonEmptyString as NES
 import RoomName exposing (RoomName)
 import Shared
-import Theme.Input
 import UpdateResult exposing (UpdateResult)
 
 
@@ -15,26 +15,14 @@ import UpdateResult exposing (UpdateResult)
 --
 
 
-type Stage
-    = SelectingNickname String
-    | Playing
-
-
 type alias Model =
     { room : RoomName
-    , stage : Stage
     }
 
 
 init : Shared.Model -> RoomName -> Model
-init shared room =
+init _ room =
     { room = room
-    , stage =
-        if shared.nickname == "" then
-            SelectingNickname ""
-
-        else
-            Playing
     }
 
 
@@ -45,32 +33,17 @@ init shared room =
 
 
 type Msg
-    = NicknameChanged String
-    | Join
+    = GotSharedMsg Shared.Msg
 
 
 update : Shared.Model -> Msg -> Model -> UpdateResult Model
 update shared msg model =
-    case model.stage of
-        Playing ->
+    case msg of
+        GotSharedMsg sharedMsg ->
             { model = model
-            , shared = shared
+            , shared = Shared.update sharedMsg shared
             , effect = Effect.none
             }
-
-        SelectingNickname currentNickname ->
-            case msg of
-                NicknameChanged nickname ->
-                    { model = { model | stage = SelectingNickname nickname }
-                    , shared = shared
-                    , effect = Effect.none
-                    }
-
-                Join ->
-                    { model = { model | stage = Playing }
-                    , shared = { shared | nickname = currentNickname }
-                    , effect = Effect.none
-                    }
 
 
 
@@ -83,20 +56,16 @@ view : Shared.Model -> Model -> Element Msg
 view shared model =
     Element.column []
         [ Element.text <| "room: " ++ RoomName.print model.room
-        , case model.stage of
-            SelectingNickname nickname ->
+        , case shared of
+            Shared.SettingUp setupModel ->
                 Element.column []
-                    [ Theme.Input.text
-                        { label = "Nickname"
-                        , onChange = NicknameChanged
-                        , value = nickname
-                        }
+                    [ Shared.view setupModel |> Element.map GotSharedMsg
                     , Element.Input.button []
-                        { label = Element.text "Join"
-                        , onPress = Just Join
+                        { onPress = Just <| GotSharedMsg Shared.Validate
+                        , label = Element.text "Join"
                         }
                     ]
 
-            _ ->
-                Element.text <| "deck of " ++ shared.nickname
+            Shared.Ready { nickname } ->
+                Element.text <| (++) "deck of " <| NES.asString nickname
         ]
