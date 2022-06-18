@@ -3,10 +3,10 @@ module Pages.Room exposing (..)
 import Effect
 import Element exposing (..)
 import Element.Input
-import Lib.NonEmptyString as NES
 import RoomName exposing (RoomName)
 import Shared
 import UpdateResult exposing (UpdateResult)
+import Nickname
 
 
 
@@ -67,5 +67,5 @@ view shared model =
                     ]
 
             Shared.Ready { nickname } ->
-                Element.text <| (++) "deck of " <| NES.asString nickname
+                Element.text <| (++) "deck of " <| Nickname.print nickname
         ]

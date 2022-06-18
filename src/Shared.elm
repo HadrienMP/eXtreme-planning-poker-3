@@ -1,8 +1,8 @@
 module Shared exposing (..)
 
 import Element exposing (Element)
-import Lib.NonEmptyString as NES exposing (NonEmptyString)
 import Theme.Input
+import Nickname exposing (Nickname)
 
 
 
@@ -18,7 +18,7 @@ type alias SetupForm =
 
 type Model
     = SettingUp SetupForm
-    | Ready { nickname : NonEmptyString }
+    | Ready { nickname : Nickname }
 
 
 init : Model
@@ -46,7 +46,7 @@ update msg model =
                     SettingUp { nickname = nickname }
 
                 Validate ->
-                    case NES.create subModel.nickname of
+                    case Nickname.fromString subModel.nickname of
                         Just nickname ->
                             Ready { nickname = nickname }
 

@@ -19,8 +19,8 @@ create value =
            )
 
 
-asString : NonEmptyString -> String
-asString nonEmptyString =
+print : NonEmptyString -> String
+print nonEmptyString =
     case nonEmptyString of
         NonEmptyString value ->
             value
