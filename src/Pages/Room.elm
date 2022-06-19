@@ -1,13 +1,13 @@
 module Pages.Room exposing (..)
 
+import Domain.Nickname
+import Domain.RoomName exposing (RoomName)
 import Effect
 import Element exposing (..)
 import Element.Input
 import Html.Attributes
-import Nickname
-import RoomName exposing (RoomName)
+import Lib.UpdateResult exposing (UpdateResult)
 import Shared
-import UpdateResult exposing (UpdateResult)
 
 
 
@@ -80,7 +80,7 @@ view shared model =
     case shared of
         Shared.SettingUp setupModel ->
             Element.column []
-                [ Element.text <| "room: " ++ RoomName.print model.room
+                [ Element.text <| "room: " ++ Domain.RoomName.print model.room
                 , Shared.view setupModel |> Element.map GotSharedMsg
                 , Element.Input.button []
                     { onPress = Just <| GotSharedMsg Shared.Validate
@@ -90,14 +90,14 @@ view shared model =
 
         Shared.Ready { nickname } ->
             Element.column []
-                [ Element.text <| "room: " ++ RoomName.print model.room
+                [ Element.text <| "room: " ++ Domain.RoomName.print model.room
                 , Element.column
                     [ Element.htmlAttribute <| Html.Attributes.class "card-slot" ]
-                    [ Element.text <| Nickname.print nickname
+                    [ Element.text <| Domain.Nickname.print nickname
                     , model.vote |> Maybe.map Element.text |> Maybe.withDefault Element.none
                     ]
                 , Element.column [ Element.htmlAttribute <| Html.Attributes.id "my-deck" ]
-                    [ Element.text <| (++) "deck of " <| Nickname.print nickname
+                    [ Element.text <| (++) "deck of " <| Domain.Nickname.print nickname
                     , displayDeck
                     ]
                 ]

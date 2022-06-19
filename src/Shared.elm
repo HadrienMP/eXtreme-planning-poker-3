@@ -1,8 +1,8 @@
 module Shared exposing (..)
 
+import Domain.Nickname exposing (Nickname)
 import Element exposing (Element)
 import Theme.Input
-import Nickname exposing (Nickname)
 
 
 
@@ -46,7 +46,7 @@ update msg model =
                     SettingUp { nickname = nickname }
 
                 Validate ->
-                    case Nickname.fromString subModel.nickname of
+                    case Domain.Nickname.fromString subModel.nickname of
                         Just nickname ->
                             Ready { nickname = nickname }
 

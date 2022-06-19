@@ -1,13 +1,13 @@
 module Pages.Home exposing (..)
 
+import Domain.RoomName exposing (RoomName)
 import Effect
 import Element exposing (Element)
 import Element.Input
-import RoomName
+import Lib.UpdateResult exposing (UpdateResult)
 import Routes
 import Shared
 import Theme.Input
-import UpdateResult exposing (UpdateResult)
 
 
 
@@ -38,7 +38,7 @@ init =
 type Msg
     = GotSharedMsg Shared.Msg
     | RoomNameChanged String
-    | Join RoomName.RoomName
+    | Join RoomName
 
 
 update : Shared.Model -> Msg -> Model -> UpdateResult Model
@@ -86,7 +86,7 @@ view shared model =
         , Element.Input.button []
             { onPress =
                 model.room
-                    |> RoomName.fromString
+                    |> Domain.RoomName.fromString
                     |> Maybe.map Join
             , label = Element.text "Join"
             }

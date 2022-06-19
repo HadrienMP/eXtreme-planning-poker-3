@@ -4,11 +4,11 @@ import Browser exposing (UrlRequest)
 import Browser.Navigation exposing (Key)
 import Effect exposing (Effect)
 import Element
+import Lib.UpdateResult exposing (UpdateResult)
 import Pages.Home
 import Pages.Room
 import Routes
 import Shared
-import UpdateResult exposing (UpdateResult)
 import Url exposing (Url)
 
 
@@ -26,6 +26,7 @@ main =
         , onUrlChange = UrlChanged
         , onUrlRequest = LinkClicked
         }
+
 
 
 --
@@ -50,7 +51,8 @@ type alias Model navigationKey =
 init : Flags -> Url -> navigationKey -> ( Model navigationKey, Effect )
 init _ url key =
     let
-        shared = Shared.init
+        shared =
+            Shared.init
     in
     ( { url = url
       , key = key
@@ -72,6 +74,7 @@ pageFrom shared url =
 
         Routes.NotFound ->
             NotFound
+
 
 
 --
@@ -122,6 +125,7 @@ handleUpdateResult model page result =
       }
     , result.effect
     )
+
 
 
 --

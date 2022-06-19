@@ -1,4 +1,4 @@
-module Nickname exposing (..)
+module Domain.Nickname exposing (..)
 
 import Lib.NonEmptyString as NES
 

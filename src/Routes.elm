@@ -1,6 +1,6 @@
 module Routes exposing (..)
 
-import RoomName
+import Domain.RoomName exposing (RoomName)
 import Url exposing (Url)
 import Url.Builder
 import Url.Parser exposing ((</>), Parser, custom, map, oneOf, parse, s, top)
@@ -8,7 +8,7 @@ import Url.Parser exposing ((</>), Parser, custom, map, oneOf, parse, s, top)
 
 type Route
     = Home
-    | Room RoomName.RoomName
+    | Room RoomName
     | NotFound
 
 
@@ -30,9 +30,9 @@ routeParser =
         ]
 
 
-roomNameParser : Parser (RoomName.RoomName -> a) a
+roomNameParser : Parser (RoomName -> a) a
 roomNameParser =
-    custom "ROOM-NAME" (Url.percentDecode >> Maybe.andThen RoomName.fromString)
+    custom "ROOM-NAME" (Url.percentDecode >> Maybe.andThen Domain.RoomName.fromString)
 
 
 toString : Route -> String
@@ -42,7 +42,7 @@ toString route =
             Url.Builder.absolute [] []
 
         Room room ->
-            Url.Builder.absolute [ "room", room |> RoomName.print |> Url.percentEncode ] []
+            Url.Builder.absolute [ "room", room |> Domain.RoomName.print |> Url.percentEncode ] []
 
         NotFound ->
             Url.Builder.absolute [ "not-found" ] []
