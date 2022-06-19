@@ -53,9 +53,16 @@ update shared msg model =
             { model =
                 { model
                     | vote =
-                        model.vote
-                            |> Maybe.map (\_ -> Nothing)
-                            |> Maybe.withDefault (Just card)
+                        case model.vote of
+                            Just c ->
+                                if c == card then
+                                    Nothing
+
+                                else
+                                    Just card
+
+                            Nothing ->
+                                Just card
                 }
             , shared = shared
             , effect = Effect.none

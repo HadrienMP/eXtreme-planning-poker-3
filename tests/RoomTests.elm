@@ -59,6 +59,18 @@ all =
                             ]
                         ]
                     |> done
+        , test "clicking a card then another changes the vote" <|
+            \_ ->
+                join { room = "dabest", player = "Joba" }
+                    |> clickButton "TFB"
+                    |> clickButton "1"
+                    |> ensureViewHas
+                        [ Selector.all
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text "1" ]
+                            ]
+                        ]
+                    |> done
         , test "a guest arriving in a room is displayed the nickname field" <|
             inRoom "dabest" <|
                 \room ->
