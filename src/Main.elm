@@ -28,8 +28,9 @@ main =
         }
 
 
-
+--
 -- Init
+--
 
 
 type Page
@@ -73,8 +74,9 @@ pageFrom shared url =
             NotFound
 
 
-
+--
 -- Update
+--
 
 
 type Msg
@@ -122,8 +124,9 @@ handleUpdateResult model page result =
     )
 
 
-
+--
 -- View
+--
 
 
 view : Model key -> Browser.Document Msg

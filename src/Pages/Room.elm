@@ -3,10 +3,11 @@ module Pages.Room exposing (..)
 import Effect
 import Element exposing (..)
 import Element.Input
+import Html.Attributes
+import Nickname
 import RoomName exposing (RoomName)
 import Shared
 import UpdateResult exposing (UpdateResult)
-import Nickname
 
 
 
@@ -54,18 +55,22 @@ update shared msg model =
 
 view : Shared.Model -> Model -> Element Msg
 view shared model =
-    Element.column []
-        [ Element.text <| "room: " ++ RoomName.print model.room
-        , case shared of
-            Shared.SettingUp setupModel ->
-                Element.column []
-                    [ Shared.view setupModel |> Element.map GotSharedMsg
-                    , Element.Input.button []
-                        { onPress = Just <| GotSharedMsg Shared.Validate
-                        , label = Element.text "Join"
-                        }
-                    ]
+    case shared of
+        Shared.SettingUp setupModel ->
+            Element.column []
+                [ Element.text <| "room: " ++ RoomName.print model.room
+                , Shared.view setupModel |> Element.map GotSharedMsg
+                , Element.Input.button []
+                    { onPress = Just <| GotSharedMsg Shared.Validate
+                    , label = Element.text "Join"
+                    }
+                ]
 
-            Shared.Ready { nickname } ->
-                Element.text <| (++) "deck of " <| Nickname.print nickname
-        ]
+        Shared.Ready { nickname } ->
+            Element.column []
+                [ Element.text <| "room: " ++ RoomName.print model.room
+                , Element.column
+                    [ Element.htmlAttribute <| Html.Attributes.class "card-slot" ]
+                    [ Element.text <| Nickname.print nickname ]
+                , Element.text <| (++) "deck of " <| Nickname.print nickname
+                ]
