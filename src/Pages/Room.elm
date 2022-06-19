@@ -50,7 +50,13 @@ update shared msg model =
             }
 
         Vote card ->
-            { model = { model | vote = Just card }
+            { model =
+                { model
+                    | vote =
+                        model.vote
+                            |> Maybe.map (\_ -> Nothing)
+                            |> Maybe.withDefault (Just card)
+                }
             , shared = shared
             , effect = Effect.none
             }
