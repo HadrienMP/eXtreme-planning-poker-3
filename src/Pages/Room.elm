@@ -1,5 +1,6 @@
 module Pages.Room exposing (..)
 
+import Domain.Card exposing (Card)
 import Domain.Nickname
 import Domain.RoomName exposing (RoomName)
 import Effect
@@ -18,7 +19,7 @@ import Shared
 
 type alias Model =
     { room : RoomName
-    , vote : Maybe String
+    , vote : Maybe Card
     }
 
 
@@ -37,7 +38,7 @@ init _ room =
 
 type Msg
     = GotSharedMsg Shared.Msg
-    | Vote String
+    | Vote Card
 
 
 update : Shared.Model -> Msg -> Model -> UpdateResult Model
@@ -70,9 +71,9 @@ update shared msg model =
 --
 
 
-deck : List String
+deck : List Card
 deck =
-    [ "1", "TFB", "NFC" ]
+    [ "1", "TFB", "NFC" ] |> List.map Domain.Card.fromString
 
 
 view : Shared.Model -> Model -> Element Msg
@@ -94,7 +95,9 @@ view shared model =
                 , Element.column
                     [ Element.htmlAttribute <| Html.Attributes.class "card-slot" ]
                     [ Element.text <| Domain.Nickname.print nickname
-                    , model.vote |> Maybe.map Element.text |> Maybe.withDefault Element.none
+                    , model.vote
+                        |> Maybe.map (Element.text << Domain.Card.print)
+                        |> Maybe.withDefault Element.none
                     ]
                 , Element.column [ Element.htmlAttribute <| Html.Attributes.id "my-deck" ]
                     [ Element.text <| (++) "deck of " <| Domain.Nickname.print nickname
@@ -108,9 +111,9 @@ displayDeck =
     Element.row [] <| List.map displayCard <| deck
 
 
-displayCard : String -> Element Msg
+displayCard : Card -> Element Msg
 displayCard card =
     Element.Input.button []
         { onPress = Just <| Vote card
-        , label = Element.text card
+        , label = Element.text <| Domain.Card.print card
         }
