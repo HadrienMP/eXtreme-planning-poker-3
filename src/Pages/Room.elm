@@ -18,12 +18,14 @@ import UpdateResult exposing (UpdateResult)
 
 type alias Model =
     { room : RoomName
+    , vote : Maybe String
     }
 
 
 init : Shared.Model -> RoomName -> Model
 init _ room =
     { room = room
+    , vote = Nothing
     }
 
 
@@ -35,6 +37,7 @@ init _ room =
 
 type Msg
     = GotSharedMsg Shared.Msg
+    | Vote String
 
 
 update : Shared.Model -> Msg -> Model -> UpdateResult Model
@@ -43,6 +46,12 @@ update shared msg model =
         GotSharedMsg sharedMsg ->
             { model = model
             , shared = Shared.update sharedMsg shared
+            , effect = Effect.none
+            }
+
+        Vote card ->
+            { model = { model | vote = Just card }
+            , shared = shared
             , effect = Effect.none
             }
 
@@ -71,6 +80,13 @@ view shared model =
                 [ Element.text <| "room: " ++ RoomName.print model.room
                 , Element.column
                     [ Element.htmlAttribute <| Html.Attributes.class "card-slot" ]
-                    [ Element.text <| Nickname.print nickname ]
-                , Element.text <| (++) "deck of " <| Nickname.print nickname
+                    [ Element.text <| Nickname.print nickname
+                    , model.vote |> Maybe.map Element.text |> Maybe.withDefault Element.none
+                    ]
+                , Element.column [ Element.htmlAttribute <| Html.Attributes.id "my-deck" ]
+                    [ Element.text <| (++) "deck of " <| Nickname.print nickname
+                    , Element.Input.button [] { onPress = Just <| Vote "1", label = Element.text "1" }
+                    , Element.Input.button [] { onPress = Just <| Vote "TFB", label = Element.text "TFB" }
+                    , Element.Input.button [] { onPress = Just <| Vote "NFC", label = Element.text "NFC" }
+                    ]
                 ]

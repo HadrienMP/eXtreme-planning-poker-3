@@ -21,6 +21,9 @@ all =
         , test "displays the deck of the player" <|
             \_ ->
                 join { room = "dabest", player = "Joba" }
+                    |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "1" ] ] ]
+                    |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "TFB" ] ] ]
+                    |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "NFC" ] ] ]
                     |> ensureViewHas [ Selector.text "deck of Joba" ]
                     |> done
         , test "displays a card slot for the player" <|
@@ -30,6 +33,17 @@ all =
                         [ Selector.all
                             [ Selector.class "card-slot"
                             , Selector.containing [ Selector.text "Joba" ]
+                            ]
+                        ]
+                    |> done
+        , test "click a card on your deck to choose a card" <|
+            \_ ->
+                join { room = "dabest", player = "Joba" }
+                    |> clickButton "TFB"
+                    |> ensureViewHas
+                        [ Selector.all
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text "TFB" ]
                             ]
                         ]
                     |> done
