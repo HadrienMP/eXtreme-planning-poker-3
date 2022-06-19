@@ -62,6 +62,11 @@ update shared msg model =
 --
 
 
+deck : List String
+deck =
+    [ "1", "TFB", "NFC" ]
+
+
 view : Shared.Model -> Model -> Element Msg
 view shared model =
     case shared of
@@ -85,8 +90,19 @@ view shared model =
                     ]
                 , Element.column [ Element.htmlAttribute <| Html.Attributes.id "my-deck" ]
                     [ Element.text <| (++) "deck of " <| Nickname.print nickname
-                    , Element.Input.button [] { onPress = Just <| Vote "1", label = Element.text "1" }
-                    , Element.Input.button [] { onPress = Just <| Vote "TFB", label = Element.text "TFB" }
-                    , Element.Input.button [] { onPress = Just <| Vote "NFC", label = Element.text "NFC" }
+                    , displayDeck
                     ]
                 ]
+
+
+displayDeck : Element Msg
+displayDeck =
+    Element.row [] <| List.map displayCard <| deck
+
+
+displayCard : String -> Element Msg
+displayCard card =
+    Element.Input.button []
+        { onPress = Just <| Vote card
+        , label = Element.text card
+        }
