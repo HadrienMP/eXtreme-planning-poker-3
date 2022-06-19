@@ -53,16 +53,11 @@ update shared msg model =
             { model =
                 { model
                     | vote =
-                        case model.vote of
-                            Just c ->
-                                if c == card then
-                                    Nothing
+                        if Just card == model.vote then
+                            Nothing
 
-                                else
-                                    Just card
-
-                            Nothing ->
-                                Just card
+                        else
+                            Just card
                 }
             , shared = shared
             , effect = Effect.none
