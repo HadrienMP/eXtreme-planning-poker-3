@@ -1,4 +1,4 @@
-module Domain.Card exposing (..)
+module Domain.Card exposing (Card, fromString, print)
 
 
 type Card

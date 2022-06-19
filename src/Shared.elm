@@ -2,6 +2,8 @@ module Shared exposing (..)
 
 import Domain.Nickname exposing (Nickname)
 import Element exposing (Element)
+import FeatherIcons
+import Html.Attributes
 import Theme.Input
 
 
@@ -59,8 +61,12 @@ update msg model =
 
 view : SetupForm -> Element Msg
 view form =
-    Theme.Input.text
+    Theme.Input.textWithIcon
         { label = "Nickname"
         , onChange = UpdateNickName
         , value = form.nickname
+        , icon =
+            FeatherIcons.user
+                |> FeatherIcons.toHtml [ Html.Attributes.style "filter" "drop-shadow(1px 1px 1px rgb(0 0 0 / 1))" ]
+                |> Element.html
         }

@@ -5,10 +5,17 @@ import Domain.Nickname
 import Domain.RoomName exposing (RoomName)
 import Effect
 import Element exposing (..)
+import Element.Background
+import Element.Font
 import Element.Input
+import Element.Region
 import Html.Attributes
 import Lib.UpdateResult exposing (UpdateResult)
 import Shared
+import Theme.Attributes
+import Theme.Colors exposing (white)
+import Theme.Theme exposing (noTextShadow)
+import FeatherIcons
 
 
 
@@ -78,32 +85,50 @@ deck =
 
 view : Shared.Model -> Model -> Element Msg
 view shared model =
-    case shared of
-        Shared.SettingUp setupModel ->
-            Element.column []
-                [ Element.text <| "room: " ++ Domain.RoomName.print model.room
-                , Shared.view setupModel |> Element.map GotSharedMsg
-                , Element.Input.button []
-                    { onPress = Just <| GotSharedMsg Shared.Validate
-                    , label = Element.text "Join"
-                    }
-                ]
+    Element.column [ spacing 20 ]
+        [ Element.row
+            [ Element.Region.heading 2, Element.Font.size 24, Theme.Attributes.id "room" ]
+            [ Element.text "room: "
+            , Element.el [ Element.Font.bold ] <| Element.text <| Domain.RoomName.print model.room
+            ]
+        , case shared of
+            Shared.SettingUp setupModel ->
+                Element.column [ spacing 20 ]
+                    [ Shared.view setupModel |> Element.map GotSharedMsg
+                    , Element.Input.button
+                        [ Element.Background.color white
+                        , Element.width fill
+                        , padding 10
+                        , Element.Font.color Theme.Colors.accent
+                        , noTextShadow
+                        ]
+                        { onPress = Just <| GotSharedMsg Shared.Validate
+                        , label =
+                            Element.row [spacingXY 6 0, centerX]
+                                [ FeatherIcons.send
+                                    |> FeatherIcons.toHtml []
+                                    |> Element.html
+                                    |> Element.el []
+                                , Element.text "Join"
+                                ]
+                        }
+                    ]
 
-        Shared.Ready { nickname } ->
-            Element.column []
-                [ Element.text <| "room: " ++ Domain.RoomName.print model.room
-                , Element.column
-                    [ Element.htmlAttribute <| Html.Attributes.class "card-slot" ]
-                    [ Element.text <| Domain.Nickname.print nickname
-                    , model.vote
-                        |> Maybe.map (Element.text << Domain.Card.print)
-                        |> Maybe.withDefault Element.none
+            Shared.Ready { nickname } ->
+                Element.column []
+                    [ Element.column
+                        [ Element.htmlAttribute <| Html.Attributes.class "card-slot" ]
+                        [ Element.text <| Domain.Nickname.print nickname
+                        , model.vote
+                            |> Maybe.map (Element.text << Domain.Card.print)
+                            |> Maybe.withDefault Element.none
+                        ]
+                    , Element.column [ Theme.Attributes.id "my-deck" ]
+                        [ Element.text <| (++) "deck of " <| Domain.Nickname.print nickname
+                        , displayDeck
+                        ]
                     ]
-                , Element.column [ Element.htmlAttribute <| Html.Attributes.id "my-deck" ]
-                    [ Element.text <| (++) "deck of " <| Domain.Nickname.print nickname
-                    , displayDeck
-                    ]
-                ]
+        ]
 
 
 displayDeck : Element Msg

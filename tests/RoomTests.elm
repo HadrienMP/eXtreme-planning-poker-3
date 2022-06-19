@@ -17,7 +17,7 @@ all =
             inRoom "dabest" <|
                 \room ->
                     startAppOn room
-                        |> expectViewHas [ Selector.text "room: dabest" ]
+                        |> expectViewHas [ Selector.id "room", Selector.containing [ Selector.text "dabest" ] ]
         , test "displays the deck of the player" <|
             \_ ->
                 join { room = "dabest", player = "Joba" }
@@ -85,7 +85,10 @@ all =
             inRoom "dabest heyhey" <|
                 \room ->
                     startAppOn room
-                        |> expectViewHas [ Selector.text "room: dabest heyhey" ]
+                        |> expectViewHas
+                            [ Selector.id "room"
+                            , Selector.containing [ Selector.text "dabest heyhey" ]
+                            ]
         ]
 
 

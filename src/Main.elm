@@ -9,6 +9,7 @@ import Pages.Home
 import Pages.Room
 import Routes
 import Shared
+import Theme.Theme exposing (layout)
 import Url exposing (Url)
 
 
@@ -137,7 +138,7 @@ view : Model key -> Browser.Document Msg
 view model =
     { title = "App"
     , body =
-        [ Element.layout [] <|
+        [ layout <|
             case model.page of
                 Home homeModel ->
                     Pages.Home.view model.shared homeModel
