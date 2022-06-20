@@ -26,9 +26,15 @@ import Theme.Theme exposing (emptySides, featherIconToElement)
 --
 
 
+type State
+    = Choosing
+    | Chosen
+
+
 type alias Model =
     { room : RoomName
     , vote : Maybe Card
+    , state : State
     }
 
 
@@ -36,6 +42,7 @@ init : Shared.Model -> RoomName -> Model
 init _ room =
     { room = room
     , vote = Nothing
+    , state = Choosing
     }
 
 
@@ -48,6 +55,7 @@ init _ room =
 type Msg
     = GotSharedMsg Shared.Msg
     | Vote Card
+    | Reveal
 
 
 update : Shared.Model -> Msg -> Model -> UpdateResult Model
@@ -69,6 +77,12 @@ update shared msg model =
                         else
                             Just card
                 }
+            , shared = shared
+            , effect = Effect.none
+            }
+
+        Reveal ->
+            { model = { model | state = Chosen }
             , shared = shared
             , effect = Effect.none
             }
@@ -108,12 +122,21 @@ view shared model =
 
             Shared.Ready { nickname } ->
                 Element.column [ spacing 30, width fill ]
-                    [ Element.column
-                        [ Element.htmlAttribute <| Html.Attributes.class "card-slot", spacing 6 ]
-                        [ model.vote
-                            |> Maybe.map Theme.Card.front
-                            |> Maybe.withDefault Theme.Card.slot
-                        , Element.el [ centerX ] <| Element.text <| Domain.Nickname.print nickname
+                    [ wrappedRow []
+                        [ Element.column
+                            [ Element.htmlAttribute <| Html.Attributes.class "card-slot", spacing 6 ]
+                            [ model.vote
+                                |> Maybe.map (\card -> case model.state of
+                                    Choosing -> Theme.Card.back
+                                    Chosen -> { label = Domain.Card.print card } |> Theme.Card.front
+                                )
+                                |> Maybe.withDefault Theme.Card.slot
+                            , Element.el [ centerX ] <| Element.text <| Domain.Nickname.print nickname
+                            ]
+                        , Element.Input.button []
+                            { onPress = Just Reveal
+                            , label = Theme.Card.front { label = "Reveal" }
+                            }
                         ]
                     , Element.column
                         [ Theme.Attributes.id "my-deck"
@@ -140,5 +163,5 @@ displayCard : Card -> Element Msg
 displayCard card =
     Element.Input.button []
         { onPress = Just <| Vote card
-        , label = Theme.Card.front card
+        , label = Theme.Card.front { label = Domain.Card.print card }
         }

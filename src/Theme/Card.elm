@@ -1,16 +1,40 @@
 module Theme.Card exposing (..)
 
-import Domain.Card exposing (Card)
 import Element exposing (..)
 import Element.Background
 import Element.Border
 import Element.Font
+import Html.Attributes
 import Theme.Colors exposing (..)
 import Theme.Theme exposing (noTextShadow)
 
 
-front : Card -> Element msg
-front label =
+back : Element msg
+back =
+    Element.el
+        [ width <| px 80
+        , height <| px 120
+        , Element.Background.color white
+        , Element.Border.rounded 8
+        , Theme.Theme.boxShadow
+        , padding 4
+        ]
+    <|
+        el
+            [ Element.Border.rounded 8
+            , Element.Border.solid
+            , Element.Border.color Theme.Colors.accent
+            , Element.Border.width 2
+            , width fill
+            , height fill
+            , htmlAttribute <| Html.Attributes.style "background" "repeating-linear-gradient( 45deg, #606dbc, #606dbc 10px, #465298 10px, #465298 20px )"
+            ]
+        <|
+            none
+
+
+front : { label : String } -> Element msg
+front { label } =
     Element.el
         [ width <| px 80
         , height <| px 120
@@ -37,8 +61,7 @@ front label =
                 , Element.Font.bold
                 ]
             <|
-                Element.text <|
-                    Domain.Card.print label
+                Element.text label
 
 
 slot : Element msg

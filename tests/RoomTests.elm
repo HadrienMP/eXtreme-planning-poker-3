@@ -40,7 +40,19 @@ all =
             \_ ->
                 join { room = "dabest", player = "Joba" }
                     |> clickButton "TFB"
+                    |> clickButton "Reveal"
                     |> ensureViewHas
+                        [ Selector.all
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text "TFB" ]
+                            ]
+                        ]
+                    |> done
+        , test "before revealing cards are hidden" <|
+            \_ ->
+                join { room = "dabest", player = "Joba" }
+                    |> clickButton "TFB"
+                    |> ensureViewHasNot
                         [ Selector.all
                             [ Selector.class "card-slot"
                             , Selector.containing [ Selector.text "TFB" ]
@@ -52,6 +64,7 @@ all =
                 join { room = "dabest", player = "Joba" }
                     |> clickButton "TFB"
                     |> clickButton "TFB"
+                    |> clickButton "Reveal"
                     |> ensureViewHasNot
                         [ Selector.all
                             [ Selector.class "card-slot"
@@ -64,6 +77,7 @@ all =
                 join { room = "dabest", player = "Joba" }
                     |> clickButton "TFB"
                     |> clickButton "1"
+                    |> clickButton "Reveal"
                     |> ensureViewHas
                         [ Selector.all
                             [ Selector.class "card-slot"
