@@ -85,6 +85,12 @@ all =
                             ]
                         ]
                     |> done
+        , test "when the cards are revealed, the deck is not longer visible" <|
+            \_ ->
+                join { room = "dabest", player = "Joba" }
+                    |> clickButton "Reveal"
+                    |> ensureViewHasNot [ Selector.id "my-deck" ]
+                    |> done
         , test "a guest arriving in a room is displayed the nickname field" <|
             inRoom "dabest" <|
                 \room ->

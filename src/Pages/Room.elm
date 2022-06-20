@@ -103,7 +103,15 @@ view : Shared.Model -> Model -> Element Msg
 view shared model =
     Element.column [ spacing 30 ]
         [ Element.row
-            [ Element.Region.heading 2, Element.Font.size 24, Theme.Attributes.id "room" ]
+            [ Element.Region.heading 2
+            , Element.Font.size 24
+            , Theme.Attributes.id "room"
+            , Element.Border.solid
+            , Element.Border.color white
+            , paddingXY 0 10
+            , Element.Border.widthEach { emptySides | bottom = 2 }
+            , width fill
+            ]
             [ Element.text "room: "
             , Element.el [ Element.Font.bold ] <| Element.text <| Domain.RoomName.print model.room
             ]
@@ -143,18 +151,23 @@ view shared model =
                             , label = Theme.Card.front { label = "Reveal" }
                             }
                         ]
-                    , Element.column
-                        [ Theme.Attributes.id "my-deck"
-                        , Element.Border.solid
-                        , Element.Border.color white
-                        , Element.Border.widthEach { emptySides | top = 2 }
-                        , paddingXY 0 12
-                        , width fill
-                        , spacing 20
-                        ]
-                        [ Element.text <| (++) "deck of " <| Domain.Nickname.print nickname
-                        , displayDeck
-                        ]
+                    , case model.state of
+                        Choosing ->
+                            Element.column
+                                [ Theme.Attributes.id "my-deck"
+                                , Element.Border.solid
+                                , Element.Border.color white
+                                , Element.Border.widthEach { emptySides | top = 2 }
+                                , paddingXY 0 12
+                                , width fill
+                                , spacing 20
+                                ]
+                                [ Element.text <| (++) "deck of " <| Domain.Nickname.print nickname
+                                , displayDeck
+                                ]
+
+                        Chosen ->
+                            Element.none
                     ]
         ]
 
