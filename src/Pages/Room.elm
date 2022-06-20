@@ -16,7 +16,8 @@ import Lib.UpdateResult exposing (UpdateResult)
 import Shared
 import Theme.Attributes
 import Theme.Colors exposing (white)
-import Theme.Theme exposing (emptySides, noTextShadow)
+import Theme.Input
+import Theme.Theme exposing (emptySides, featherIconToElement, noTextShadow)
 
 
 
@@ -86,7 +87,7 @@ deck =
 
 view : Shared.Model -> Model -> Element Msg
 view shared model =
-    Element.column [ spacing 20 ]
+    Element.column [ spacing 30 ]
         [ Element.row
             [ Element.Region.heading 2, Element.Font.size 24, Theme.Attributes.id "room" ]
             [ Element.text "room: "
@@ -96,31 +97,21 @@ view shared model =
             Shared.SettingUp setupModel ->
                 Element.column [ spacing 20 ]
                     [ Shared.view setupModel |> Element.map GotSharedMsg
-                    , Element.Input.button
-                        [ Element.Background.color white
-                        , Element.width fill
-                        , padding 10
-                        , Element.Font.color Theme.Colors.accent
-                        , noTextShadow
-                        ]
+                    , Theme.Input.buttonWithIcon
                         { onPress = Just <| GotSharedMsg Shared.Validate
-                        , label =
-                            Element.row [ spacingXY 6 0, centerX ]
-                                [ FeatherIcons.send
-                                    |> FeatherIcons.toHtml []
-                                    |> Element.html
-                                    |> Element.el []
-                                , Element.text "Join"
-                                ]
+                        , icon =
+                            FeatherIcons.send
+                                |> featherIconToElement { shadow = False }
+                        , label = "Join"
                         }
                     ]
 
             Shared.Ready { nickname } ->
-                Element.column [ spacing 20 ]
+                Element.column [ spacing 30, width fill ]
                     [ Element.column
                         [ Element.htmlAttribute <| Html.Attributes.class "card-slot", spacing 6 ]
                         [ model.vote
-                            |> Maybe.map (Element.text << Domain.Card.print)
+                            |> Maybe.map cardFront
                             |> Maybe.withDefault emptyCard
                         , Element.el [ centerX ] <| Element.text <| Domain.Nickname.print nickname
                         ]
@@ -130,12 +121,59 @@ view shared model =
                         , Element.Border.color white
                         , Element.Border.widthEach { emptySides | top = 2 }
                         , paddingXY 0 12
+                        , width fill
+                        , spacing 20
                         ]
                         [ Element.text <| (++) "deck of " <| Domain.Nickname.print nickname
                         , displayDeck
                         ]
                     ]
         ]
+
+
+displayDeck : Element Msg
+displayDeck =
+    Element.row [ spacing 10 ] <| List.map displayCard <| deck
+
+
+displayCard : Card -> Element Msg
+displayCard card =
+    Element.Input.button []
+        { onPress = Just <| Vote card
+        , label = cardFront card
+        }
+
+
+cardFront : Card -> Element msg
+cardFront label =
+    Element.el
+        [ width <| px 80
+        , height <| px 120
+        , Element.Background.color white
+        , Element.Border.rounded 8
+        , Theme.Theme.boxShadow
+        , padding 4
+        ]
+    <|
+        el
+            [ Element.Border.rounded 8
+            , Element.Border.solid
+            , Element.Border.color Theme.Colors.accent
+            , Element.Border.width 2
+            , width fill
+            , height fill
+            ]
+        <|
+            el
+                [ centerX
+                , centerY
+                , noTextShadow
+                , Element.Font.color Theme.Colors.accent
+                , Element.Font.bold
+                ]
+            <|
+                Element.text <|
+                    Domain.Card.print label
 
 
 emptyCard : Element msg
@@ -150,16 +188,3 @@ emptyCard =
         ]
     <|
         Element.none
-
-
-displayDeck : Element Msg
-displayDeck =
-    Element.row [] <| List.map displayCard <| deck
-
-
-displayCard : Card -> Element Msg
-displayCard card =
-    Element.Input.button []
-        { onPress = Just <| Vote card
-        , label = Element.text <| Domain.Card.print card
-        }

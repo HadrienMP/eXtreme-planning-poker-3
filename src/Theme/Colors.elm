@@ -1,7 +1,6 @@
 module Theme.Colors exposing (..)
 
-import Element exposing (rgba)
-import Element exposing (rgb)
+import Element exposing (rgb, rgba, toRgb)
 import Element.HexColor exposing (hex)
 
 
@@ -12,12 +11,31 @@ black =
 
 accent : Element.Color
 accent =
-    hexToRgba "#08AEEA"
+    hexToRgba "#1ad5bf"
 
 
 text : Element.Color
 text =
     white
+
+
+darken : Element.Color -> Element.Color
+darken color =
+    color
+        |> toRgb
+        |> (\{ red, green, blue, alpha } -> rgba (red * 0.9) (green * 0.9) (blue * 0.9) alpha)
+
+
+moreTransparent : Int -> Element.Color -> Element.Color
+moreTransparent amount color =
+    color
+        |> toRgb
+        |> (\{ red, green, blue, alpha } -> rgba red green blue (alpha * (toFloat (10 - amount) / 10)))
+
+
+placeholder : Element.Color
+placeholder =
+    white |> moreTransparent 2
 
 
 white : Element.Color

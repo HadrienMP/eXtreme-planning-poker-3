@@ -3,8 +3,8 @@ module Shared exposing (..)
 import Domain.Nickname exposing (Nickname)
 import Element exposing (Element)
 import FeatherIcons
-import Html.Attributes
 import Theme.Input
+import Theme.Theme exposing (featherIconToElement)
 
 
 
@@ -67,6 +67,5 @@ view form =
         , value = form.nickname
         , icon =
             FeatherIcons.user
-                |> FeatherIcons.toHtml [ Html.Attributes.style "filter" "drop-shadow(1px 1px 1px rgb(0 0 0 / 1))" ]
-                |> Element.html
+                |> featherIconToElement { shadow = True }
         }

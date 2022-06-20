@@ -2,12 +2,13 @@ module Pages.Home exposing (..)
 
 import Domain.RoomName exposing (RoomName)
 import Effect
-import Element exposing (Element)
-import Element.Input
+import Element exposing (Element, spacing)
+import FeatherIcons
 import Lib.UpdateResult exposing (UpdateResult)
 import Routes
 import Shared
 import Theme.Input
+import Theme.Theme exposing (featherIconToElement)
 
 
 
@@ -71,23 +72,27 @@ update shared msg model =
 
 view : Shared.Model -> Model -> Element Msg
 view shared model =
-    Element.column []
+    Element.column [ spacing 20 ]
         [ case shared of
             Shared.SettingUp setupModel ->
                 Shared.view setupModel |> Element.map GotSharedMsg
 
             _ ->
                 Element.none
-        , Theme.Input.text
+        , Theme.Input.textWithIcon
             { label = "Room"
             , onChange = RoomNameChanged
             , value = model.room
+            , icon = FeatherIcons.activity |> featherIconToElement { shadow = True }
             }
-        , Element.Input.button []
+        , Theme.Input.buttonWithIcon
             { onPress =
                 model.room
                     |> Domain.RoomName.fromString
                     |> Maybe.map Join
-            , label = Element.text "Join"
+            , icon =
+                FeatherIcons.send
+                    |> featherIconToElement { shadow = False }
+            , label = "Join"
             }
         ]

@@ -1,48 +1,60 @@
-module Theme.Input exposing (text, textWithIcon)
+module Theme.Input exposing (buttonWithIcon, textWithIcon)
 
-import Element exposing (Element, paddingEach, spacingXY)
-import Element.Background
-import Element.Border
-import Element.Font
-import Element.Input
+import Element as E exposing (..)
+import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
+import Element.Input as Input
 import Html.Attributes
 import Theme.Colors
-import Theme.Theme exposing (emptySides)
-
-
-text : { onChange : String -> msg, value : String, label : String } -> Element msg
-text { onChange, value, label } =
-    Element.el [] <|
-        text_ { onChange = onChange, value = value, label = label }
+import Theme.Theme exposing (emptySides, noTextShadow)
 
 
 textWithIcon : { onChange : String -> msg, value : String, label : String, icon : Element msg } -> Element msg
 textWithIcon { onChange, value, label, icon } =
-    Element.row
-        [ Element.Border.widthEach { emptySides | bottom = 2 }
-        , Element.Border.solid
-        , Element.Border.color Theme.Colors.text
+    row
+        [ Border.widthEach { emptySides | bottom = 2 }
+        , Border.solid
+        , Border.color Theme.Colors.text
         , spacingXY 10 0
         , paddingEach { emptySides | bottom = 4 }
         ]
-        [ Element.el [] <| icon
+        [ icon
         , text_ { onChange = onChange, value = value, label = label }
         ]
 
 
 text_ : { onChange : String -> msg, value : String, label : String } -> Element msg
 text_ { onChange, value, label } =
-    Element.Input.text
-        [ Element.htmlAttribute <| Html.Attributes.id <| String.toLower label
-        , Element.Background.color Theme.Colors.transparent
-        , Element.Font.color Theme.Colors.text
-        , Element.Border.width 0
-        , Element.Border.rounded 0
-        , Element.paddingXY 0 6
-        , Theme.Theme.textShadow
+    Input.text
+        [ htmlAttribute <| Html.Attributes.id <| String.toLower label
+        , Background.color Theme.Colors.transparent
+        , Font.color Theme.Colors.text
+        , Border.width 0
+        , Border.rounded 0
+        , padding 0
         ]
         { onChange = onChange
         , text = value
-        , label = Element.Input.labelHidden label
-        , placeholder = Just <| Element.Input.placeholder [ Element.Font.color Theme.Colors.text ] <| Element.text label
+        , label = Input.labelHidden label
+        , placeholder = Just <| Input.placeholder [ Font.color Theme.Colors.placeholder, noTextShadow ] <| E.text label
+        }
+
+
+buttonWithIcon : { onPress : Maybe msg, icon : Element msg, label : String } -> Element msg
+buttonWithIcon data =
+    Input.button
+        [ Background.color Theme.Colors.white
+        , paddingXY 20 10
+        , centerX
+        , Border.rounded 100
+        , Font.color Theme.Colors.accent
+        , noTextShadow
+        ]
+        { onPress = data.onPress
+        , label =
+            row [ spacingXY 6 0, centerX ]
+                [ data.icon
+                , E.text data.label
+                ]
         }
