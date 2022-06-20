@@ -5,7 +5,6 @@ import Domain.Nickname
 import Domain.RoomName exposing (RoomName)
 import Effect
 import Element exposing (..)
-import Element.Background
 import Element.Border
 import Element.Font
 import Element.Input
@@ -15,9 +14,10 @@ import Html.Attributes
 import Lib.UpdateResult exposing (UpdateResult)
 import Shared
 import Theme.Attributes
+import Theme.Card
 import Theme.Colors exposing (white)
 import Theme.Input
-import Theme.Theme exposing (emptySides, featherIconToElement, noTextShadow)
+import Theme.Theme exposing (emptySides, featherIconToElement)
 
 
 
@@ -111,8 +111,8 @@ view shared model =
                     [ Element.column
                         [ Element.htmlAttribute <| Html.Attributes.class "card-slot", spacing 6 ]
                         [ model.vote
-                            |> Maybe.map cardFront
-                            |> Maybe.withDefault emptyCard
+                            |> Maybe.map Theme.Card.front
+                            |> Maybe.withDefault Theme.Card.slot
                         , Element.el [ centerX ] <| Element.text <| Domain.Nickname.print nickname
                         ]
                     , Element.column
@@ -140,51 +140,5 @@ displayCard : Card -> Element Msg
 displayCard card =
     Element.Input.button []
         { onPress = Just <| Vote card
-        , label = cardFront card
+        , label = Theme.Card.front card
         }
-
-
-cardFront : Card -> Element msg
-cardFront label =
-    Element.el
-        [ width <| px 80
-        , height <| px 120
-        , Element.Background.color white
-        , Element.Border.rounded 8
-        , Theme.Theme.boxShadow
-        , padding 4
-        ]
-    <|
-        el
-            [ Element.Border.rounded 8
-            , Element.Border.solid
-            , Element.Border.color Theme.Colors.accent
-            , Element.Border.width 2
-            , width fill
-            , height fill
-            ]
-        <|
-            el
-                [ centerX
-                , centerY
-                , noTextShadow
-                , Element.Font.color Theme.Colors.accent
-                , Element.Font.bold
-                ]
-            <|
-                Element.text <|
-                    Domain.Card.print label
-
-
-emptyCard : Element msg
-emptyCard =
-    Element.el
-        [ width <| px 80
-        , height <| px 120
-        , Element.Border.dashed
-        , Element.Border.width 2
-        , Element.Border.color white
-        , Element.Border.rounded 8
-        ]
-    <|
-        Element.none
