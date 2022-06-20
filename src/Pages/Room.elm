@@ -6,16 +6,17 @@ import Domain.RoomName exposing (RoomName)
 import Effect
 import Element exposing (..)
 import Element.Background
+import Element.Border
 import Element.Font
 import Element.Input
 import Element.Region
+import FeatherIcons
 import Html.Attributes
 import Lib.UpdateResult exposing (UpdateResult)
 import Shared
 import Theme.Attributes
 import Theme.Colors exposing (white)
-import Theme.Theme exposing (noTextShadow)
-import FeatherIcons
+import Theme.Theme exposing (emptySides, noTextShadow)
 
 
 
@@ -104,7 +105,7 @@ view shared model =
                         ]
                         { onPress = Just <| GotSharedMsg Shared.Validate
                         , label =
-                            Element.row [spacingXY 6 0, centerX]
+                            Element.row [ spacingXY 6 0, centerX ]
                                 [ FeatherIcons.send
                                     |> FeatherIcons.toHtml []
                                     |> Element.html
@@ -115,20 +116,40 @@ view shared model =
                     ]
 
             Shared.Ready { nickname } ->
-                Element.column []
+                Element.column [ spacing 20 ]
                     [ Element.column
-                        [ Element.htmlAttribute <| Html.Attributes.class "card-slot" ]
-                        [ Element.text <| Domain.Nickname.print nickname
-                        , model.vote
+                        [ Element.htmlAttribute <| Html.Attributes.class "card-slot", spacing 6 ]
+                        [ model.vote
                             |> Maybe.map (Element.text << Domain.Card.print)
-                            |> Maybe.withDefault Element.none
+                            |> Maybe.withDefault emptyCard
+                        , Element.el [ centerX ] <| Element.text <| Domain.Nickname.print nickname
                         ]
-                    , Element.column [ Theme.Attributes.id "my-deck" ]
+                    , Element.column
+                        [ Theme.Attributes.id "my-deck"
+                        , Element.Border.solid
+                        , Element.Border.color white
+                        , Element.Border.widthEach { emptySides | top = 2 }
+                        , paddingXY 0 12
+                        ]
                         [ Element.text <| (++) "deck of " <| Domain.Nickname.print nickname
                         , displayDeck
                         ]
                     ]
         ]
+
+
+emptyCard : Element msg
+emptyCard =
+    Element.el
+        [ width <| px 80
+        , height <| px 120
+        , Element.Border.dashed
+        , Element.Border.width 2
+        , Element.Border.color white
+        , Element.Border.rounded 8
+        ]
+    <|
+        Element.none
 
 
 displayDeck : Element Msg

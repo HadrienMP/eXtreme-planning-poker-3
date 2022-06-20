@@ -38,10 +38,20 @@ layout =
         }
         (pageBackground
             ++ [ Element.Font.color Theme.Colors.text
-               , Element.Font.shadow { offset = ( 1, 1 ), blur = 1, color = Theme.Colors.black }
+               , textShadow
                ]
         )
         << Element.el
             [ Element.centerX
             , Element.centerY
             ]
+
+
+textShadow : Element.Attribute msg
+textShadow =
+    Element.Font.shadow { offset = ( 1, 1 ), blur = 1, color = Theme.Colors.black }
+
+
+emptySides : { top : Int, left : Int, right : Int, bottom : Int }
+emptySides =
+    { top = 0, left = 0, right = 0, bottom = 0 }
