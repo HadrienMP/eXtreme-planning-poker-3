@@ -56,6 +56,7 @@ type Msg
     = GotSharedMsg Shared.Msg
     | Vote Card
     | Reveal
+    | Restart
 
 
 update : Shared.Model -> Msg -> Model -> UpdateResult Model
@@ -83,6 +84,12 @@ update shared msg model =
 
         Reveal ->
             { model = { model | state = Chosen }
+            , shared = shared
+            , effect = Effect.none
+            }
+
+        Restart ->
+            { model = { model | state = Choosing, vote = Nothing }
             , shared = shared
             , effect = Effect.none
             }
@@ -147,8 +154,24 @@ view shared model =
                             , Element.el [ centerX ] <| Element.text <| Domain.Nickname.print nickname
                             ]
                         , Element.Input.button [ alignTop ]
-                            { onPress = Just Reveal
-                            , label = Theme.Card.front { label = "Reveal" }
+                            { onPress =
+                                Just <|
+                                    case model.state of
+                                        Choosing ->
+                                            Reveal
+
+                                        Chosen ->
+                                            Restart
+                            , label =
+                                Theme.Card.front
+                                    { label =
+                                        case model.state of
+                                            Choosing ->
+                                                "Reveal"
+
+                                            Chosen ->
+                                                "Restart"
+                                    }
                             }
                         ]
                     , case model.state of
