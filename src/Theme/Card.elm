@@ -4,7 +4,6 @@ import Element exposing (..)
 import Element.Background
 import Element.Border
 import Element.Font
-import Html.Attributes
 import Theme.Colors exposing (..)
 import Theme.Theme exposing (noTextShadow)
 
@@ -27,7 +26,7 @@ back =
             , Element.Border.width 2
             , width fill
             , height fill
-            , htmlAttribute <| Html.Attributes.style "background" "repeating-linear-gradient( 45deg, #606dbc, #606dbc 10px, #465298 10px, #465298 20px )"
+            , Theme.Theme.stripes ( white, accent )
             ]
         <|
             none

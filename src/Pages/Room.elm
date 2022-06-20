@@ -122,18 +122,23 @@ view shared model =
 
             Shared.Ready { nickname } ->
                 Element.column [ spacing 30, width fill ]
-                    [ wrappedRow []
+                    [ wrappedRow [ spaceEvenly, spacing 10 ]
                         [ Element.column
                             [ Element.htmlAttribute <| Html.Attributes.class "card-slot", spacing 6 ]
                             [ model.vote
-                                |> Maybe.map (\card -> case model.state of
-                                    Choosing -> Theme.Card.back
-                                    Chosen -> { label = Domain.Card.print card } |> Theme.Card.front
-                                )
+                                |> Maybe.map
+                                    (\card ->
+                                        case model.state of
+                                            Choosing ->
+                                                Theme.Card.back
+
+                                            Chosen ->
+                                                { label = Domain.Card.print card } |> Theme.Card.front
+                                    )
                                 |> Maybe.withDefault Theme.Card.slot
                             , Element.el [ centerX ] <| Element.text <| Domain.Nickname.print nickname
                             ]
-                        , Element.Input.button []
+                        , Element.Input.button [ alignTop ]
                             { onPress = Just Reveal
                             , label = Theme.Card.front { label = "Reveal" }
                             }

@@ -1,12 +1,13 @@
 module Theme.Theme exposing (..)
 
-import Element exposing (Element, rgba)
+import Element exposing (Color, Element, rgba)
 import Element.Background
 import Element.Border
 import Element.Font
 import FeatherIcons exposing (Icon)
 import Html exposing (Html)
 import Html.Attributes
+import String exposing (concat)
 import Theme.Colors exposing (hexToRgba, moreTransparent)
 
 
@@ -16,6 +17,37 @@ pageBackground =
     , Element.htmlAttribute <|
         Html.Attributes.style "background-image" "linear-gradient(0deg, #08AEEA 0%, #2AF598 100%)"
     ]
+
+
+stripes : ( Color, Color ) -> Element.Attribute msg
+stripes ( first, second ) =
+    concat
+        [ "repeating-linear-gradient( 45deg, "
+        , toRgbaString first
+        , ", "
+        , toRgbaString first
+        , " 10px, "
+        , toRgbaString second
+        , " 10px, "
+        , toRgbaString second
+        , " 20px )"
+        ]
+        |> Html.Attributes.style "background"
+        |> Element.htmlAttribute
+
+
+toRgbaString : Color -> String
+toRgbaString first =
+    Element.toRgb first
+        |> (\{ red, green, blue, alpha } -> [ red, green, blue, alpha ])
+        |> (\parts ->
+                parts
+                    |> List.map ((*) 255)
+                    |> List.map floor
+                    |> List.map String.fromInt
+                    |> String.join ", "
+                    |> (\it -> concat [ "rgba(", it, ")" ])
+           )
 
 
 noTextShadow : Element.Attribute msg
