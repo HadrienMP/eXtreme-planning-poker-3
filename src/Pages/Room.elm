@@ -124,7 +124,7 @@ playingView nickname model =
     Element.column [ spacing 30, width fill ]
         [ wrappedRow [ spaceEvenly, spacing 10 ]
             [ Element.column
-                [ Element.htmlAttribute <| Html.Attributes.class "card-slot", spacing 6 ]
+                [ Element.htmlAttribute <| Html.Attributes.class "card-slot", spacing 6, width <| px 80 ]
                 [ model.vote
                     |> Maybe.map
                         (\card ->
@@ -136,9 +136,8 @@ playingView nickname model =
                                     { label = Domain.Card.print card } |> Theme.Card.front
                         )
                     |> Maybe.withDefault Theme.Card.slot
-                , Element.el [ centerX, width <| px 80 ] <|
-                    ellipsisText [ Element.Font.center ] <|
-                        Domain.Nickname.print nickname
+                , ellipsisText [ Element.Font.center ] <|
+                    Domain.Nickname.print nickname
                 ]
             , Element.Input.button [ alignTop ]
                 { onPress =

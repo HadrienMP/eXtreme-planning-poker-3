@@ -121,7 +121,7 @@ featherIconToElement { shadow } icon =
 
 ellipsisText : List (Element.Attribute msg) -> String -> Element msg
 ellipsisText attributes label =
-    el (attributes ++ [ Element.width fill, clip ]) <|
+    el (attributes ++ [ Element.width fill ]) <|
         Element.html <|
             Html.p
                 [ Html.Attributes.style "text-overflow" "ellipsis"
