@@ -1,6 +1,6 @@
 module Theme.Theme exposing (..)
 
-import Element exposing (Color, Element, clip, el, fill, rgba)
+import Element exposing (Attribute, Color, Element, clipX, el, fill, maximum, rgba, shrink, width)
 import Element.Background
 import Element.Border
 import Element.Font
@@ -78,6 +78,8 @@ layout =
         << Element.el
             [ Element.centerX
             , Element.centerY
+            , pageWidth
+            , clipX
             ]
 
 
@@ -131,3 +133,8 @@ ellipsisText attributes label =
                 , Html.Attributes.style "margin" "0"
                 ]
                 [ Html.text label ]
+
+
+pageWidth : Attribute msg
+pageWidth =
+    shrink |> maximum 270 |> width

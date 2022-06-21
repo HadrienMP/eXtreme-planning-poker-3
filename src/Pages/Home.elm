@@ -8,7 +8,7 @@ import Lib.UpdateResult exposing (UpdateResult)
 import Routes
 import Shared
 import Theme.Input
-import Theme.Theme exposing (featherIconToElement)
+import Theme.Theme exposing (featherIconToElement, pageWidth)
 
 
 
@@ -72,12 +72,14 @@ update shared msg model =
 
 view : Shared.Model -> Model -> Element Msg
 view shared model =
-    Element.column [ spacing 30 ]
+    Element.column [ spacing 30, pageWidth ]
         [ Theme.Input.textWithIcon
             { label = "Room"
             , onChange = RoomNameChanged
             , value = model.room
-            , icon = FeatherIcons.box |> featherIconToElement { shadow = True }
+            , icon =
+                FeatherIcons.box
+                    |> featherIconToElement { shadow = True }
             }
         , case shared of
             Shared.SettingUp setupModel ->

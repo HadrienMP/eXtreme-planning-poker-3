@@ -5,10 +5,10 @@ import Domain.Nickname exposing (Nickname)
 import Domain.RoomName exposing (RoomName)
 import Effect
 import Element exposing (..)
-import Element.Border
-import Element.Font
-import Element.Input
-import Element.Region
+import Element.Border as Border
+import Element.Font as Font
+import Element.Input as Input
+import Element.Region as Region
 import FeatherIcons
 import Html.Attributes
 import Lib.UpdateResult exposing (UpdateResult)
@@ -17,7 +17,7 @@ import Theme.Attributes
 import Theme.Card
 import Theme.Colors exposing (white)
 import Theme.Input
-import Theme.Theme exposing (ellipsisText, emptySides, featherIconToElement)
+import Theme.Theme exposing (ellipsisText, emptySides, featherIconToElement, pageWidth)
 
 
 
@@ -108,7 +108,7 @@ deck =
 
 view : Shared.Model -> Model -> Element Msg
 view shared model =
-    Element.column [ spacing 30 ]
+    column [ spacing 30, pageWidth ]
         [ title model
         , case shared of
             Shared.SettingUp setupModel ->
@@ -121,10 +121,10 @@ view shared model =
 
 playingView : Nickname -> Model -> Element Msg
 playingView nickname model =
-    Element.column [ spacing 30, width fill ]
+    column [ spacing 30, width fill ]
         [ wrappedRow [ spaceEvenly, spacing 10 ]
-            [ Element.column
-                [ Element.htmlAttribute <| Html.Attributes.class "card-slot", spacing 6, width <| px 80 ]
+            [ column
+                [ htmlAttribute <| Html.Attributes.class "card-slot", spacing 6, width <| px 80 ]
                 [ model.vote
                     |> Maybe.map
                         (\card ->
@@ -136,10 +136,10 @@ playingView nickname model =
                                     { label = Domain.Card.print card } |> Theme.Card.front
                         )
                     |> Maybe.withDefault Theme.Card.slot
-                , ellipsisText [ Element.Font.center ] <|
+                , ellipsisText [ Font.center ] <|
                     Domain.Nickname.print nickname
                 ]
-            , Element.Input.button [ alignTop ]
+            , Input.button [ alignTop ]
                 { onPress =
                     Just <|
                         case model.state of
@@ -162,28 +162,32 @@ playingView nickname model =
             ]
         , case model.state of
             Choosing ->
-                Element.column
+                column
                     [ Theme.Attributes.id "my-deck"
-                    , Element.Border.solid
-                    , Element.Border.color white
-                    , Element.Border.widthEach { emptySides | top = 2 }
+                    , Border.solid
+                    , Border.color white
+                    , Border.widthEach { emptySides | top = 2 }
                     , paddingXY 0 12
                     , spacing 20
-                    , width <| px 300
+                    , width fill
                     ]
-                    [ ellipsisText [] <| (++) "deck of " <| Domain.Nickname.print nickname
+                    [ row [ spacing 6, width fill ]
+                        [ FeatherIcons.user |> featherIconToElement { shadow = True }
+                        , text <| "deck:"
+                        , ellipsisText [ clipX, Font.bold ] <| Domain.Nickname.print nickname
+                        ]
                     , displayDeck
                     ]
 
             Chosen ->
-                Element.none
+                none
         ]
 
 
 setupView : Shared.SetupForm -> Element Msg
 setupView setupModel =
-    Element.column [ spacing 30, width fill ]
-        [ Shared.view setupModel |> Element.map GotSharedMsg
+    column [ spacing 30, width fill ]
+        [ Shared.view setupModel |> map GotSharedMsg
         , Theme.Input.buttonWithIcon
             { onPress = Just <| GotSharedMsg Shared.Validate
             , icon =
@@ -196,27 +200,27 @@ setupView setupModel =
 
 title : Model -> Element Msg
 title model =
-    Element.row
-        [ Element.Region.heading 2
-        , Element.Font.size 24
+    row
+        [ Region.heading 2
+        , Font.size 24
         , Theme.Attributes.id "room"
         , width fill
         , spacing 8
         ]
         [ FeatherIcons.box |> featherIconToElement { shadow = True }
-        , Element.text "room:"
-        , Element.el [ Element.Font.bold ] <| Element.text <| Domain.RoomName.print model.room
+        , text "room:"
+        , el [ Font.bold ] <| text <| Domain.RoomName.print model.room
         ]
 
 
 displayDeck : Element Msg
 displayDeck =
-    Element.row [ spacing 10, centerX ] <| List.map displayCard <| deck
+    row [ spacing 10, centerX ] <| List.map displayCard <| deck
 
 
 displayCard : Card -> Element Msg
 displayCard card =
-    Element.Input.button []
+    Input.button []
         { onPress = Just <| Vote card
         , label = Theme.Card.front { label = Domain.Card.print card }
         }

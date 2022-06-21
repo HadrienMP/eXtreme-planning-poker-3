@@ -33,7 +33,7 @@ all =
                         |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "1" ] ] ]
                         |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "TFB" ] ] ]
                         |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "NFC" ] ] ]
-                        |> ensureViewHas [ Selector.text "deck of Joba" ]
+                        |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "Joba" ] ] ]
                         |> done
             , test "displays a card slot for the player" <|
                 \_ ->
@@ -122,7 +122,7 @@ all =
                     join { room = "dabest", player = "Joba" }
                         |> clickButton "Reveal"
                         |> clickButton "Restart"
-                        |> ensureViewHas [ Selector.text "deck of Joba" ]
+                        |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "Joba" ] ] ]
                         |> done
             ]
         , test "a guest arriving in a room is displayed the nickname field" <|
@@ -133,7 +133,7 @@ all =
                         |> writeInField { id = "nickname", label = "Nickname", value = "Jo" }
                         |> writeInField { id = "nickname", label = "Nickname", value = "ba" }
                         |> clickButton "Join"
-                        |> ensureViewHas [ Selector.text "deck of ba" ]
+                        |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "ba" ] ] ]
                         |> done
         ]
 
