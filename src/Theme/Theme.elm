@@ -1,6 +1,6 @@
 module Theme.Theme exposing (..)
 
-import Element exposing (Color, Element, rgba)
+import Element exposing (Color, Element, clip, el, fill, rgba)
 import Element.Background
 import Element.Border
 import Element.Font
@@ -83,12 +83,21 @@ layout =
 
 textShadow : Element.Attribute msg
 textShadow =
-    Element.Font.shadow { offset = ( 1, 1 ), blur = 1, color = Theme.Colors.black }
+    Element.Font.shadow
+        { offset = ( 1, 1 )
+        , blur = 1
+        , color = Theme.Colors.black
+        }
 
 
 boxShadow : Element.Attribute msg
 boxShadow =
-    Element.Border.shadow { offset = ( 1, 1 ), size = 1, blur = 1, color = Theme.Colors.black |> moreTransparent 7 }
+    Element.Border.shadow
+        { offset = ( 1, 1 )
+        , size = 1
+        , blur = 1
+        , color = Theme.Colors.black |> moreTransparent 7
+        }
 
 
 emptySides : { top : Int, left : Int, right : Int, bottom : Int }
@@ -108,3 +117,17 @@ featherIconToElement { shadow } icon =
             ]
         |> Element.html
         |> Element.el []
+
+
+ellipsisText : List (Element.Attribute msg) -> String -> Element msg
+ellipsisText attributes label =
+    el (attributes ++ [ Element.width fill, clip ]) <|
+        Element.html <|
+            Html.p
+                [ Html.Attributes.style "text-overflow" "ellipsis"
+                , Html.Attributes.style "overflow" "hidden"
+                , Html.Attributes.style "max-width" "100%"
+                , Html.Attributes.title label
+                , Html.Attributes.style "margin" "0"
+                ]
+                [ Html.text label ]

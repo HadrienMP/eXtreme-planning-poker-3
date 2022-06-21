@@ -72,19 +72,19 @@ update shared msg model =
 
 view : Shared.Model -> Model -> Element Msg
 view shared model =
-    Element.column [ spacing 20 ]
-        [ case shared of
+    Element.column [ spacing 30 ]
+        [ Theme.Input.textWithIcon
+            { label = "Room"
+            , onChange = RoomNameChanged
+            , value = model.room
+            , icon = FeatherIcons.box |> featherIconToElement { shadow = True }
+            }
+        , case shared of
             Shared.SettingUp setupModel ->
                 Shared.view setupModel |> Element.map GotSharedMsg
 
             _ ->
                 Element.none
-        , Theme.Input.textWithIcon
-            { label = "Room"
-            , onChange = RoomNameChanged
-            , value = model.room
-            , icon = FeatherIcons.activity |> featherIconToElement { shadow = True }
-            }
         , Theme.Input.buttonWithIcon
             { onPress =
                 model.room

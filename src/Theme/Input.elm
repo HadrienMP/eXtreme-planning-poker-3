@@ -16,8 +16,9 @@ textWithIcon { onChange, value, label, icon } =
         [ Border.widthEach { emptySides | bottom = 2 }
         , Border.solid
         , Border.color Theme.Colors.text
-        , spacingXY 10 0
-        , paddingEach { emptySides | bottom = 4 }
+        , spacing 10
+        , paddingEach { emptySides | bottom = 8 }
+        , width fill
         ]
         [ icon
         , text_ { onChange = onChange, value = value, label = label }
@@ -33,6 +34,7 @@ text_ { onChange, value, label } =
         , Border.width 0
         , Border.rounded 0
         , padding 0
+        , width fill
         ]
         { onChange = onChange
         , text = value
@@ -50,6 +52,7 @@ buttonWithIcon data =
         , Border.rounded 100
         , Font.color Theme.Colors.accent
         , noTextShadow
+        , width fill
         ]
         { onPress = data.onPress
         , label =

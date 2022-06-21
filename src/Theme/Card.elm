@@ -1,4 +1,4 @@
-module Theme.Card exposing (..)
+module Theme.Card exposing (back, front, slot, action)
 
 import Element exposing (..)
 import Element.Background
@@ -34,6 +34,21 @@ back =
 
 front : { label : String } -> Element msg
 front { label } =
+    front_ { label = label, size = Regular }
+
+
+action : { label : String } -> Element msg
+action { label } =
+    front_ { label = label, size = Small }
+
+
+type ActionSize
+    = Regular
+    | Small
+
+
+front_ : { label : String, size : ActionSize } -> Element msg
+front_ { label, size } =
     Element.el
         [ width <| px 80
         , height <| px 120
@@ -58,6 +73,12 @@ front { label } =
                 , noTextShadow
                 , Element.Font.color Theme.Colors.accent
                 , Element.Font.bold
+                , case size of
+                    Regular ->
+                        Element.Font.size 20
+
+                    Small ->
+                        Element.Font.size 14
                 ]
             <|
                 Element.text label
