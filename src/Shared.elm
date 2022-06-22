@@ -68,4 +68,5 @@ view form =
         , icon =
             FeatherIcons.user
                 |> featherIconToElement { shadow = True }
+        , size = Just 10
         }

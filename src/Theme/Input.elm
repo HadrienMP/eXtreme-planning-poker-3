@@ -10,8 +10,15 @@ import Theme.Colors
 import Theme.Theme exposing (emptySides, noTextShadow)
 
 
-textWithIcon : { onChange : String -> msg, value : String, label : String, icon : Element msg } -> Element msg
-textWithIcon { onChange, value, label, icon } =
+textWithIcon :
+    { onChange : String -> msg
+    , value : String
+    , label : String
+    , icon : Element msg
+    , size : Maybe Int
+    }
+    -> Element msg
+textWithIcon { onChange, value, label, icon, size } =
     row
         [ Border.widthEach { emptySides | bottom = 2 }
         , Border.solid
@@ -21,21 +28,29 @@ textWithIcon { onChange, value, label, icon } =
         , width fill
         ]
         [ icon
-        , text_ { onChange = onChange, value = value, label = label }
+        , text_ { onChange = onChange, value = value, label = label, size = size }
         ]
 
 
-text_ : { onChange : String -> msg, value : String, label : String } -> Element msg
-text_ { onChange, value, label } =
+text_ :
+    { onChange : String -> msg
+    , value : String
+    , label : String
+    , size : Maybe Int
+    }
+    -> Element msg
+text_ { onChange, value, label, size } =
     Input.text
-        [ htmlAttribute <| Html.Attributes.id <| String.toLower label
-        , Background.color Theme.Colors.transparent
-        , Font.color Theme.Colors.text
-        , Border.width 0
-        , Border.rounded 0
-        , padding 0
-        , width fill
-        ]
+        ([ htmlAttribute <| Html.Attributes.id <| String.toLower label
+         , Background.color Theme.Colors.transparent
+         , Font.color Theme.Colors.text
+         , Border.width 0
+         , Border.rounded 0
+         , padding 0
+         , width fill
+         ]
+            ++ (size |> Maybe.map (\a -> [ htmlAttribute <| Html.Attributes.size a ]) |> Maybe.withDefault [])
+        )
         { onChange = onChange
         , text = value
         , label = Input.labelHidden label
@@ -43,7 +58,12 @@ text_ { onChange, value, label } =
         }
 
 
-buttonWithIcon : { onPress : Maybe msg, icon : Element msg, label : String } -> Element msg
+buttonWithIcon :
+    { onPress : Maybe msg
+    , icon : Element msg
+    , label : String
+    }
+    -> Element msg
 buttonWithIcon data =
     Input.button
         [ Background.color Theme.Colors.white

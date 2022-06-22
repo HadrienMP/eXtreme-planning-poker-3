@@ -108,80 +108,98 @@ deck =
 
 view : Shared.Model -> Model -> Element Msg
 view shared model =
-    column [ spacing 30, pageWidth ]
-        [ title model
-        , case shared of
-            Shared.SettingUp setupModel ->
-                setupView setupModel
+    case shared of
+        Shared.SettingUp setupModel ->
+            column [ pageWidth, spacing 30 ]
+                [ title model
+                , setupView setupModel
+                ]
 
-            Shared.Ready { nickname } ->
-                playingView nickname model
-        ]
+        Shared.Ready { nickname } ->
+            playingView nickname model
 
 
 playingView : Nickname -> Model -> Element Msg
 playingView nickname model =
-    column [ spacing 30, width fill ]
-        [ wrappedRow [ spaceEvenly, spacing 10 ]
-            [ column
-                [ htmlAttribute <| Html.Attributes.class "card-slot", spacing 6, width <| px 80 ]
-                [ model.vote
-                    |> Maybe.map
-                        (\card ->
-                            case model.state of
-                                Choosing ->
-                                    Theme.Card.back
-
-                                Chosen ->
-                                    { label = Domain.Card.print card } |> Theme.Card.front
-                        )
-                    |> Maybe.withDefault Theme.Card.slot
-                , ellipsisText [ Font.center ] <|
-                    Domain.Nickname.print nickname
-                ]
-            , Input.button [ alignTop ]
-                { onPress =
-                    Just <|
-                        case model.state of
-                            Choosing ->
-                                Reveal
-
-                            Chosen ->
-                                Restart
-                , label =
-                    Theme.Card.action
-                        { label =
-                            case model.state of
-                                Choosing ->
-                                    "Reveal"
-
-                                Chosen ->
-                                    "Restart"
-                        }
-                }
+    column [ spacing 30, pageWidth ]
+        [ el (Theme.Theme.bottomBorder ++ [ width fill ]) <| title model
+        , wrappedRow [ spaceEvenly, spacing 10 ]
+            [ displayCardSlot model nickname
+            , revealRestartButton model
             ]
-        , case model.state of
-            Choosing ->
-                column
-                    [ Theme.Attributes.id "my-deck"
+        , displayDeck model nickname
+        ]
+
+
+displayCardSlot : Model -> Nickname -> Element Msg
+displayCardSlot model nickname =
+    column
+        [ htmlAttribute <| Html.Attributes.class "card-slot", spacing 6, width <| px 80 ]
+        [ model.vote
+            |> Maybe.map
+                (\card ->
+                    case model.state of
+                        Choosing ->
+                            Theme.Card.back
+
+                        Chosen ->
+                            { label = Domain.Card.print card } |> Theme.Card.front
+                )
+            |> Maybe.withDefault Theme.Card.slot
+        , ellipsisText [ Font.center, Font.size 16 ] <|
+            Domain.Nickname.print nickname
+        ]
+
+
+displayDeck : Model -> Nickname -> Element Msg
+displayDeck model nickname =
+    case model.state of
+        Choosing ->
+            column
+                [ Theme.Attributes.id "my-deck"
+                , spacing 20
+                , width fill
+                ]
+                [ row
+                    [ spacing 8
+                    , width fill
                     , Border.solid
                     , Border.color white
-                    , Border.widthEach { emptySides | top = 2 }
-                    , paddingXY 0 12
-                    , spacing 20
-                    , width fill
+                    , Border.widthEach { emptySides | bottom = 2 }
+                    , paddingEach { emptySides | bottom = 12 }
                     ]
-                    [ row [ spacing 6, width fill ]
-                        [ FeatherIcons.user |> featherIconToElement { shadow = True }
-                        , text <| "deck:"
-                        , ellipsisText [ clipX, Font.bold ] <| Domain.Nickname.print nickname
-                        ]
-                    , displayDeck
+                    [ FeatherIcons.user |> featherIconToElement { shadow = True }
+                    , ellipsisText [ clipX, Font.bold ] <| Domain.Nickname.print nickname
                     ]
+                , displayDeckCards model.vote
+                ]
 
-            Chosen ->
-                none
-        ]
+        Chosen ->
+            none
+
+
+revealRestartButton : Model -> Element Msg
+revealRestartButton model =
+    Input.button [ alignTop ]
+        { onPress =
+            Just <|
+                case model.state of
+                    Choosing ->
+                        Reveal
+
+                    Chosen ->
+                        Restart
+        , label =
+            Theme.Card.action
+                { label =
+                    case model.state of
+                        Choosing ->
+                            "Reveal"
+
+                        Chosen ->
+                            "Restart"
+                }
+        }
 
 
 setupView : Shared.SetupForm -> Element Msg
@@ -205,22 +223,35 @@ title model =
         , Font.size 24
         , Theme.Attributes.id "room"
         , width fill
-        , spacing 8
+        , spacing 10
         ]
         [ FeatherIcons.box |> featherIconToElement { shadow = True }
         , text "room:"
-        , el [ Font.bold ] <| text <| Domain.RoomName.print model.room
+        , ellipsisText [ Font.bold, clipX ] <| Domain.RoomName.print model.room
         ]
 
 
-displayDeck : Element Msg
-displayDeck =
-    row [ spacing 10, centerX ] <| List.map displayCard <| deck
+displayDeckCards : Maybe Card -> Element Msg
+displayDeckCards selected =
+    row [ spacing 10, centerX ] <| List.map (displayCard selected) <| deck
 
 
-displayCard : Card -> Element Msg
-displayCard card =
-    Input.button []
+displayCard : Maybe Card -> Card -> Element Msg
+displayCard selected card =
+    Input.button
+        [ moveUp <|
+            if Just card == selected then
+                8
+
+            else
+                0
+        , alpha <|
+            if Just card == selected || selected == Nothing then
+                1
+
+            else
+                0.8
+        ]
         { onPress = Just <| Vote card
         , label = Theme.Card.front { label = Domain.Card.print card }
         }

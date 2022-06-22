@@ -80,6 +80,7 @@ view shared model =
             , icon =
                 FeatherIcons.box
                     |> featherIconToElement { shadow = True }
+            , size = Just 10
             }
         , case shared of
             Shared.SettingUp setupModel ->
