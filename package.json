@@ -20,5 +20,7 @@
     "husky": "^8.0.1",
     "parcel": "^2.6.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "nanoid": "^4.0.0"
+  }
 }

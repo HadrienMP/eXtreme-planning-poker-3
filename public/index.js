@@ -1,3 +1,5 @@
 import { Elm } from "../src/Main.elm";
+import { nanoid } from "nanoid";
 
-Elm.Main.init();
+const app = Elm.Main.init();
+app.ports.playerIdPort.send(nanoid());
