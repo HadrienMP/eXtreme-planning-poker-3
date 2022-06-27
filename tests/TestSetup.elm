@@ -1,12 +1,12 @@
 module TestSetup exposing (..)
 
 import Effect exposing (Effect(..))
+import Html.Attributes
 import Main
 import ProgramTest exposing (..)
 import Routes exposing (Route)
 import SimulatedEffect.Cmd
 import SimulatedEffect.Navigation
-import Html.Attributes
 import Test.Html.Selector as Selector
 
 
