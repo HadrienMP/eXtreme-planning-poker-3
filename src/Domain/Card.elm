@@ -1,4 +1,6 @@
-module Domain.Card exposing (Card, fromString, print)
+module Domain.Card exposing (Card, decoder, fromString, print)
+
+import Json.Decode as Decode
 
 
 type Card
@@ -15,3 +17,9 @@ print card =
     case card of
         Card value ->
             value
+
+
+decoder : Decode.Decoder Card
+decoder =
+    Decode.string
+        |> Decode.map Card
