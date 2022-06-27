@@ -3,12 +3,13 @@ module Main exposing (..)
 import Browser exposing (UrlRequest)
 import Browser.Navigation exposing (Key)
 import Effect exposing (Effect)
-import Element
+import Element exposing (Element)
 import Lib.UpdateResult exposing (UpdateResult)
 import Pages.Home
 import Pages.Room
 import Routes
 import Shared
+import Theme.Attributes exposing (id)
 import Theme.Theme exposing (layout)
 import Url exposing (Url)
 
@@ -23,7 +24,7 @@ main =
         { init = \flags url key -> init flags url key |> Tuple.mapSecond (Effect.perform key)
         , view = view
         , update = \msg model -> update msg model |> Tuple.mapSecond (Effect.perform model.key)
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         , onUrlChange = UrlChanged
         , onUrlRequest = LinkClicked
         }
@@ -86,6 +87,7 @@ pageFrom shared url =
 type Msg
     = GotHomeMsg Pages.Home.Msg
     | GotRoomMsg Pages.Room.Msg
+    | GotSharedMsg Shared.Msg
     | UrlChanged Url
     | LinkClicked UrlRequest
 
@@ -109,6 +111,9 @@ update msg model =
                 Browser.External href ->
                     ( model, Effect.load href )
 
+        ( _, GotSharedMsg subMsg ) ->
+            ( { model | shared = Shared.update subMsg model.shared }, Effect.none )
+
         ( _, UrlChanged url ) ->
             ( { model | url = url, page = pageFrom model.shared url }
             , Effect.none
@@ -130,6 +135,17 @@ handleUpdateResult model page result =
 
 
 --
+-- Subscriptions
+--
+
+
+subscriptions : Model key -> Sub Msg
+subscriptions model =
+    Shared.subscriptions model.shared |> Sub.map GotSharedMsg
+
+
+
+--
 -- View
 --
 
@@ -139,16 +155,25 @@ view model =
     { title = "App"
     , body =
         [ layout <|
-            case model.page of
-                Home homeModel ->
-                    Pages.Home.view model.shared homeModel
-                        |> Element.map GotHomeMsg
+            if Shared.hasPlayerId model.shared then
+                displayPage model
 
-                Room roomModel ->
-                    Pages.Room.view model.shared roomModel
-                        |> Element.map GotRoomMsg
-
-                NotFound ->
-                    Element.text "Not found"
+            else
+                Element.el [ id "loader" ] <| Element.text "Loading"
         ]
     }
+
+
+displayPage : Model key -> Element Msg
+displayPage model =
+    case model.page of
+        Home homeModel ->
+            Pages.Home.view model.shared homeModel
+                |> Element.map GotHomeMsg
+
+        Room roomModel ->
+            Pages.Room.view model.shared roomModel
+                |> Element.map GotRoomMsg
+
+        NotFound ->
+            Element.text "Not found"

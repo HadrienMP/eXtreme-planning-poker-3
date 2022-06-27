@@ -16,6 +16,7 @@ all =
         [ test "Clicking on join redirects you to the room you chose" <|
             \_ ->
                 startAppOn Routes.Home
+                    |> withPlayerId
                     |> writeInField { id = "room", label = "Room", value = "dabest" }
                     |> writeInField { id = "nickname", label = "Nickname", value = "Joba" }
                     |> clickButton "Join"
@@ -23,6 +24,7 @@ all =
         , test "Room names can't be empty" <|
             \_ ->
                 startAppOn Routes.Home
+                    |> withPlayerId
                     |> writeInField { id = "room", label = "Room", value = "" }
                     |> writeInField { id = "nickname", label = "Nickname", value = "Joba" }
                     |> ensureView

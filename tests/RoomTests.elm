@@ -26,11 +26,18 @@ setup =
         inRoom "dabest" <|
             \room ->
                 startAppOn room
+                    |> withPlayerId
                     |> ensureViewHasNot [ Selector.text "deck of Joba" ]
                     |> writeInField { id = "nickname", label = "Nickname", value = "Jo" }
                     |> writeInField { id = "nickname", label = "Nickname", value = "ba" }
                     |> clickButton "Join"
                     |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "ba" ] ] ]
+                    |> done
+    , test "display a loader when the player id is not defined" <|
+        inRoom "dabest" <|
+            \room ->
+                startAppOn room
+                    |> ensureViewHas [ Selector.id "loader" ]
                     |> done
     ]
 
@@ -126,11 +133,13 @@ initialDisplay =
         inRoom "dabest" <|
             \room ->
                 startAppOn room
+                    |> withPlayerId
                     |> expectViewHas [ Selector.id "room", Selector.containing [ Selector.text "dabest" ] ]
     , test "spaces are allowed in the room name" <|
         inRoom "dabest heyhey" <|
             \room ->
                 startAppOn room
+                    |> withPlayerId
                     |> expectViewHas
                         [ Selector.id "room"
                         , Selector.containing [ Selector.text "dabest heyhey" ]
@@ -159,6 +168,7 @@ initialDisplay =
 join : { a | room : String, player : String } -> ProgramTest (Main.Model ()) Main.Msg Effect
 join { room, player } =
     startAppOn Routes.Home
+        |> withPlayerId
         |> writeInField { id = "room", label = "Room", value = room }
         |> writeInField { id = "nickname", label = "Nickname", value = player }
         |> clickButton "Join"

@@ -202,7 +202,7 @@ revealRestartButton model =
         }
 
 
-setupView : Shared.SetupForm -> Element Msg
+setupView : Shared.Incomplete -> Element Msg
 setupView setupModel =
     column [ spacing 30, width fill ]
         [ Shared.view setupModel |> map GotSharedMsg
