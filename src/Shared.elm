@@ -34,14 +34,29 @@ type Model
     | Ready Complete
 
 
+getComplete : Model -> Maybe Complete
+getComplete model =
+    case model of
+        SettingUp _ ->
+            Nothing
+
+        Ready complete ->
+            Just complete
+
+
+getPlayer : Model -> Maybe Player
+getPlayer =
+    getComplete >> Maybe.map .player
+
+
 hasPlayerId : Model -> Bool
 hasPlayerId model =
     case model of
-        SettingUp incomplete ->
-            incomplete.playerId /= Nothing
-
         Ready _ ->
             True
+
+        SettingUp incomplete ->
+            incomplete.playerId /= Nothing
 
 
 init : Model
