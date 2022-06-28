@@ -1,4 +1,4 @@
-module RoomTests exposing (..)
+module Pages.RoomTests exposing (..)
 
 import Effect exposing (Effect)
 import Main

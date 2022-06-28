@@ -1,4 +1,4 @@
-module HomeTests exposing (..)
+module Pages.HomeTests exposing (..)
 
 import Expect
 import Html.Attributes as Attr

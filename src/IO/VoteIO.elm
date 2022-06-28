@@ -1,4 +1,4 @@
-module VoteIO exposing (..)
+module IO.VoteIO exposing (..)
 
 import Json.Decode as Decode
 import Json.Encode as Json
