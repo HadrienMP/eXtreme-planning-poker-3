@@ -101,7 +101,27 @@ cardsRevealed =
 choosingCards : List Test
 choosingCards =
     [ describe "my actions"
-        [ test "click a card on your deck to choose a card" <|
+        [ test "arriving in room - click a card on your deck to choose a card" <|
+            withMaybe2 ( Room.fromString "dabest", PlayerId.create "playerId-joba" ) <|
+                \( room, playerId ) ->
+                    startAppOn (Routes.Room room)
+                        |> withPlayerId playerId
+                        |> writeInField { id = "nickname", label = "Nickname", value = "Joba" }
+                        |> clickButton "Join"
+                        |> clickButton "TFB"
+                        |> clickButton "Reveal"
+                        |> ensureViewHas
+                            [ Selector.all
+                                [ Selector.class "card-slot"
+                                , Selector.containing [ Selector.text "TFB" ]
+                                ]
+                            ]
+                        |> ensureOutgoingPortValues
+                            "votes"
+                            Vote.decoder
+                            (Expect.equal [ Vote.Vote playerId (Just <| Card.fromString "TFB") ])
+                        |> done
+        , test "creating the room - click a card on your deck to choose a card" <|
             withMaybe (PlayerId.create "playerId-joba") <|
                 \playerId ->
                     joinWithPlayerId { room = "dabest", player = { nickname = "Joba", id = playerId } }

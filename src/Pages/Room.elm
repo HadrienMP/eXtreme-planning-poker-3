@@ -78,7 +78,7 @@ update shared msg model =
                 updated =
                     Shared.update Shared.Validate shared
             in
-            { model = { model | players = addPlayer shared model.players }
+            { model = { model | players = addPlayer updated model.players }
             , shared = updated
             , effect =
                 case updated of

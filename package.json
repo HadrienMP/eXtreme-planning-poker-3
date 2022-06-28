@@ -17,6 +17,7 @@
     "elm-test": "^0.19.1-revision7",
     "elm-tooling": "^1.8.0",
     "gitmoji-cli": "^5.0.1",
+    "gun": "^0.2020.1237",
     "husky": "^8.0.1",
     "parcel": "^2.6.0"
   },
