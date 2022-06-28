@@ -1,5 +1,6 @@
 module TestSetup exposing (..)
 
+import Domain.Player as Player
 import Domain.Vote as Vote
 import Effect exposing (Effect(..))
 import Html.Attributes
@@ -69,6 +70,9 @@ simulateEffects effect =
 
         ShareVote vote ->
             SimulatedEffect.Ports.send "votes" (Vote.json vote)
+
+        SharePlayer player ->
+            SimulatedEffect.Ports.send "player" (Player.json player)
 
 
 simulateSubscriptions : Main.Model () -> ProgramTest.SimulatedSub Main.Msg

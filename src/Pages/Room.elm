@@ -58,6 +58,7 @@ type Msg
     | Voted Vote
     | Reveal
     | Restart
+    | Join
 
 
 update : Shared.Model -> Msg -> Model -> UpdateResult Model
@@ -67,6 +68,22 @@ update shared msg model =
             { model = model
             , shared = Shared.update sharedMsg shared
             , effect = Effect.none
+            }
+
+        Join ->
+            let
+                updated =
+                    Shared.update Shared.Validate shared
+            in
+            { model = model
+            , shared = updated
+            , effect =
+                case updated of
+                    Shared.Ready { player } ->
+                        Effect.SharePlayer player
+
+                    _ ->
+                        Effect.none
             }
 
         Voted vote ->
@@ -117,7 +134,7 @@ playingView shared model =
     column [ spacing 30, pageWidth ]
         [ el (Theme.Theme.bottomBorder ++ [ width fill ]) <| title model
         , wrappedRow [ spaceEvenly, spacing 10 ]
-            [ displayCardSlot model shared.nickname
+            [ displayCardSlot model shared.player.nickname
             , revealRestartButton model
             ]
         , displayDeck model shared
@@ -162,7 +179,7 @@ displayDeck model shared =
                     , paddingEach { emptySides | bottom = 12 }
                     ]
                     [ FeatherIcons.user |> featherIconToElement { shadow = True }
-                    , ellipsisText [ clipX, Font.bold ] <| Domain.Nickname.print shared.nickname
+                    , ellipsisText [ clipX, Font.bold ] <| Domain.Nickname.print shared.player.nickname
                     ]
                 , displayDeckCards model.vote shared
                 ]
@@ -200,7 +217,7 @@ setupView setupModel =
     column [ spacing 30, width fill ]
         [ Shared.view setupModel |> map GotSharedMsg
         , Theme.Input.buttonWithIcon
-            { onPress = Just <| GotSharedMsg Shared.Validate
+            { onPress = Just Join
             , icon =
                 FeatherIcons.send
                     |> featherIconToElement { shadow = False }
@@ -233,7 +250,7 @@ displayCard : Maybe Card -> Shared.Complete -> Card -> Element Msg
 displayCard selected shared card =
     if Just card == selected then
         Input.button [ moveUp 8 ]
-            { onPress = Vote shared.playerId Maybe.Nothing |> Voted |> Just
+            { onPress = Vote shared.player.id Maybe.Nothing |> Voted |> Just
             , label = Theme.Card.front { label = Domain.Card.print card }
             }
 
@@ -246,6 +263,6 @@ displayCard selected shared card =
                 else
                     0.8
             ]
-            { onPress = Just <| Voted <| Vote shared.playerId (Just card)
+            { onPress = Just <| Voted <| Vote shared.player.id (Just card)
             , label = Theme.Card.front { label = Domain.Card.print card }
             }

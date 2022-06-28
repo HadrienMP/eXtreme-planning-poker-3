@@ -1,6 +1,9 @@
 module Pages.RoomTests exposing (..)
 
 import Domain.Card as Card
+import Domain.Nickname as Nickname
+import Domain.Player as Player
+import Domain.RoomName as Room
 import Domain.Vote as Vote
 import Effect exposing (Effect)
 import Expect
@@ -27,15 +30,19 @@ all =
 setup : List Test
 setup =
     [ test "a guest arriving in a room is displayed the nickname field" <|
-        inRoom "dabest" <|
-            \room ->
-                startAppOn room
-                    |> withAPlayerId
+        withMaybe3 ( Room.fromString "dabest", NES.create "ba-id", Nickname.fromString "ba" ) <|
+            \( room, id, nickname ) ->
+                startAppOn (Routes.Room room)
+                    |> withPlayerId id
                     |> ensureViewHasNot [ Selector.text "deck of Joba" ]
                     |> writeInField { id = "nickname", label = "Nickname", value = "Jo" }
-                    |> writeInField { id = "nickname", label = "Nickname", value = "ba" }
+                    |> writeInField { id = "nickname", label = "Nickname", value = Nickname.print nickname }
                     |> clickButton "Join"
-                    |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "ba" ] ] ]
+                    |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text <| Nickname.print nickname ] ] ]
+                    |> ensureOutgoingPortValues
+                        "player"
+                        Player.decoder
+                        (Expect.equal [ Player.Player id nickname ])
                     |> done
     , test "display a loader when the player id is not defined" <|
         inRoom "dabest" <|

@@ -5,30 +5,36 @@ import Expect
 import Routes
 
 
-inRoom : String -> (Routes.Route -> Expect.Expectation) -> (() -> Expect.Expectation)
-inRoom room test =
-    room
-        |> Domain.RoomName.fromString
-        |> Maybe.map Routes.Room
-        |> Maybe.map (\route -> \_ -> test route)
-        |> Maybe.withDefault (\_ -> Expect.fail "dabest was rejected as a room name")
+inRoom : String -> (Routes.Route -> Expect.Expectation) -> () -> Expect.Expectation
+inRoom room testF =
+    withMaybe (Domain.RoomName.fromString room) (Routes.Room >> testF)
 
 
 withMaybe : Maybe a -> (a -> Expect.Expectation) -> () -> Expect.Expectation
-withMaybe it test _ =
+withMaybe it testF _ =
     case it of
         Just b ->
-            test b
+            testF b
 
         Nothing ->
-            Expect.fail "Expected a value to start the test"
+            Expect.fail <| "Expected a value to start the test but got " ++ Debug.toString it
 
 
 withMaybe2 : ( Maybe a, Maybe b ) -> (( a, b ) -> Expect.Expectation) -> () -> Expect.Expectation
-withMaybe2 tuple test _ =
+withMaybe2 tuple testF _ =
     case tuple of
         ( Just a, Just b ) ->
-            test ( a, b )
+            testF ( a, b )
 
         _ ->
-            Expect.fail "Expected values to start the test"
+            Expect.fail <| "Expected values to start the test but got " ++ Debug.toString tuple
+
+
+withMaybe3 : ( Maybe a, Maybe b, Maybe c ) -> (( a, b, c ) -> Expect.Expectation) -> () -> Expect.Expectation
+withMaybe3 tuple testF _ =
+    case tuple of
+        ( Just a, Just b, Just c ) ->
+            testF ( a, b, c )
+
+        _ ->
+            Expect.fail <| "Expected values to start the test but got " ++ Debug.toString tuple

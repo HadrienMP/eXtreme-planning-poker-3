@@ -1,6 +1,7 @@
 port module Shared exposing (..)
 
-import Domain.Nickname exposing (Nickname)
+import Domain.Nickname
+import Domain.Player exposing (Player)
 import Element exposing (Element)
 import FeatherIcons
 import Json.Decode
@@ -25,9 +26,7 @@ type alias Incomplete =
 
 
 type alias Complete =
-    { nickname : Nickname
-    , playerId : NonEmptyString
-    }
+    { player : Player }
 
 
 type Model
@@ -81,7 +80,7 @@ update msg model =
                     -- TODO HMP do some error handling here, maybe display a help message
                     case ( Domain.Nickname.fromString subModel.nickname, subModel.playerId ) of
                         ( Just nickname, Just playerId ) ->
-                            Ready { nickname = nickname, playerId = playerId }
+                            Ready { player = { nickname = nickname, id = playerId } }
 
                         _ ->
                             model
