@@ -44,6 +44,15 @@ setup =
                         Player.decoder
                         (Expect.equal [ Player.Player id nickname ])
                     |> done
+    , test "share the player's identity when they initialize the room also" <|
+        withMaybe2 ( NES.create "emma-id", Nickname.fromString "Emma" ) <|
+            \( id, nickname ) ->
+                joinWithPlayerId { room = "dabest", player = { nickname = Nickname.print nickname, id = id } }
+                    |> ensureOutgoingPortValues
+                        "player"
+                        Player.decoder
+                        (Expect.equal [ Player.Player id nickname ])
+                    |> done
     , test "display a loader when the player id is not defined" <|
         inRoom "dabest" <|
             \room ->

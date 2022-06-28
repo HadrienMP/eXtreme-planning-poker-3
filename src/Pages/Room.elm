@@ -80,7 +80,7 @@ update shared msg model =
             , effect =
                 case updated of
                     Shared.Ready { player } ->
-                        Effect.SharePlayer player
+                        Effect.sharePlayer player
 
                     _ ->
                         Effect.none
@@ -89,7 +89,7 @@ update shared msg model =
         Voted vote ->
             { model = { model | vote = vote.card }
             , shared = shared
-            , effect = Effect.ShareVote vote
+            , effect = Effect.shareVote vote
             }
 
         Reveal ->

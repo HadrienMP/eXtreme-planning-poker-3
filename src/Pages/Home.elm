@@ -58,9 +58,22 @@ update shared msg model =
             }
 
         Join room ->
+            let
+                updated =
+                    Shared.update Shared.Validate shared
+            in
             { model = model
-            , shared = Shared.update Shared.Validate shared
-            , effect = Effect.pushRoute <| Routes.Room room
+            , shared = updated
+            , effect =
+                Effect.batch
+                    [ Effect.pushRoute <| Routes.Room room
+                    , case updated of
+                        Shared.Ready { player } ->
+                            Effect.sharePlayer player
+
+                        _ ->
+                            Effect.none
+                    ]
             }
 
 

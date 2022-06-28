@@ -13,7 +13,7 @@ port votes : Json.Value -> Cmd msg
 port player : Json.Value -> Cmd msg
 
 
-type Effect
+type AtomicEffect
     = None
     | PushUrl String
     | LoadUrl String
@@ -21,8 +21,25 @@ type Effect
     | SharePlayer Player
 
 
+type Effect
+    = Atomic AtomicEffect
+    | Batch (List AtomicEffect)
+
+
 perform : Browser.Navigation.Key -> Effect -> Cmd msg
 perform key effect =
+    case effect of
+        Atomic atomic ->
+            performAtomic key atomic
+
+        Batch effects ->
+            effects
+                |> List.map (performAtomic key)
+                |> Cmd.batch
+
+
+performAtomic : Browser.Navigation.Key -> AtomicEffect -> Cmd msg
+performAtomic key effect =
     case effect of
         None ->
             Cmd.none
@@ -42,7 +59,39 @@ perform key effect =
 
 none : Effect
 none =
-    None
+    Atomic None
+
+
+batch : List Effect -> Effect
+batch effects =
+    effects
+        |> toAtomicList []
+        |> Batch
+
+
+toAtomicList : List AtomicEffect -> List Effect -> List AtomicEffect
+toAtomicList acc effects =
+    case effects of
+        [] ->
+            acc
+
+        head :: tail ->
+            case head of
+                Atomic atomic ->
+                    toAtomicList (atomic :: acc) tail
+
+                Batch list ->
+                    toAtomicList (list ++ acc) tail
+
+
+sharePlayer : Player -> Effect
+sharePlayer =
+    Atomic << SharePlayer
+
+
+shareVote : Vote -> Effect
+shareVote =
+    Atomic << ShareVote
 
 
 
@@ -51,19 +100,19 @@ none =
 
 pushUrl : String -> Effect
 pushUrl =
-    PushUrl
+    Atomic << PushUrl
 
 
 pushRoute : Route -> Effect
 pushRoute route =
-    PushUrl <| Routes.toString route
+    Atomic <| PushUrl <| Routes.toString route
 
 
 load : String -> Effect
 load =
-    LoadUrl
+    Atomic << LoadUrl
 
 
 loadRoute : Route -> Effect
 loadRoute route =
-    LoadUrl <| Routes.toString route
+    Atomic <| LoadUrl <| Routes.toString route

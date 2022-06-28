@@ -2,7 +2,7 @@ module TestSetup exposing (..)
 
 import Domain.Player as Player
 import Domain.Vote as Vote
-import Effect exposing (Effect(..))
+import Effect exposing (AtomicEffect(..), Effect(..))
 import Html.Attributes
 import Json.Decode
 import Json.Encode
@@ -58,6 +58,16 @@ withPlayerId playerId test =
 
 simulateEffects : Effect -> ProgramTest.SimulatedEffect Main.Msg
 simulateEffects effect =
+    case effect of
+        Atomic atomic ->
+            simulateAtomicEffects atomic
+
+        Batch effects ->
+            effects |> List.map simulateAtomicEffects |> SimulatedEffect.Cmd.batch
+
+
+simulateAtomicEffects : AtomicEffect -> ProgramTest.SimulatedEffect Main.Msg
+simulateAtomicEffects effect =
     case effect of
         None ->
             SimulatedEffect.Cmd.none
