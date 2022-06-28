@@ -1,13 +1,19 @@
 module Pages.RoomTests exposing (..)
 
 import Effect exposing (Effect)
+import Expect
+import FeatherIcons exposing (play)
+import Lib.NonEmptyString as NES exposing (NonEmptyString)
 import Main
+import Pages.Room exposing (Msg(..))
 import ProgramTest exposing (..)
 import Routes
 import Test exposing (..)
 import Test.Html.Selector as Selector
 import TestSetup exposing (..)
-import Utils exposing (inRoom)
+import Utils exposing (..)
+import IO.VoteIO as VoteIO exposing (VoteIO)
+import Domain.Card as Card
 
 
 all : Test
@@ -26,7 +32,7 @@ setup =
         inRoom "dabest" <|
             \room ->
                 startAppOn room
-                    |> withPlayerId
+                    |> withAPlayerId
                     |> ensureViewHasNot [ Selector.text "deck of Joba" ]
                     |> writeInField { id = "nickname", label = "Nickname", value = "Jo" }
                     |> writeInField { id = "nickname", label = "Nickname", value = "ba" }
@@ -76,17 +82,23 @@ cardsRevealed =
 choosingCards : List Test
 choosingCards =
     [ test "click a card on your deck to choose a card" <|
-        \_ ->
-            join { room = "dabest", player = "Joba" }
-                |> clickButton "TFB"
-                |> clickButton "Reveal"
-                |> ensureViewHas
-                    [ Selector.all
-                        [ Selector.class "card-slot"
-                        , Selector.containing [ Selector.text "TFB" ]
+        withMaybe (NES.create "playerId-joba") <|
+            \playerId ->
+                join { room = "dabest", player = "Joba" }
+                    |> withPlayerId playerId
+                    |> clickButton "TFB"
+                    |> clickButton "Reveal"
+                    |> ensureViewHas
+                        [ Selector.all
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text "TFB" ]
+                            ]
                         ]
-                    ]
-                |> done
+                    |> ensureOutgoingPortValues
+                        "vote"
+                        VoteIO.decoder
+                        (Expect.equal [ VoteIO playerId (Card.fromString "TFB") ])
+                    |> done
     , test "before revealing cards are hidden" <|
         \_ ->
             join { room = "dabest", player = "Joba" }
@@ -133,13 +145,13 @@ initialDisplay =
         inRoom "dabest" <|
             \room ->
                 startAppOn room
-                    |> withPlayerId
+                    |> withAPlayerId
                     |> expectViewHas [ Selector.id "room", Selector.containing [ Selector.text "dabest" ] ]
     , test "spaces are allowed in the room name" <|
         inRoom "dabest heyhey" <|
             \room ->
                 startAppOn room
-                    |> withPlayerId
+                    |> withAPlayerId
                     |> expectViewHas
                         [ Selector.id "room"
                         , Selector.containing [ Selector.text "dabest heyhey" ]
@@ -168,7 +180,7 @@ initialDisplay =
 join : { a | room : String, player : String } -> ProgramTest (Main.Model ()) Main.Msg Effect
 join { room, player } =
     startAppOn Routes.Home
-        |> withPlayerId
+        |> withAPlayerId
         |> writeInField { id = "room", label = "Room", value = room }
         |> writeInField { id = "nickname", label = "Nickname", value = player }
         |> clickButton "Join"

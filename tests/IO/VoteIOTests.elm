@@ -6,6 +6,7 @@ import IO.VoteIO
 import Json.Decode
 import Lib.NonEmptyString as NES
 import Test exposing (..)
+import Utils exposing (..)
 
 
 all : Test
@@ -19,13 +20,3 @@ all =
                         |> Json.Decode.decodeValue IO.VoteIO.decoder
                         |> Expect.equal (Result.Ok { player = playerId, card = Card.fromString "1" })
         ]
-
-
-withMaybe : Maybe a -> (a -> Expect.Expectation) -> () -> Expect.Expectation
-withMaybe it test _ =
-    case it of
-        Just b ->
-            test b
-
-        Nothing ->
-            Expect.fail "Expected a value to start the test"

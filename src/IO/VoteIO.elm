@@ -1,10 +1,9 @@
-module IO.VoteIO exposing (..)
+port module IO.VoteIO exposing (..)
 
 import Json.Decode as Decode
 import Json.Encode as Json
 import Lib.NonEmptyString as NES exposing (NonEmptyString)
 import Domain.Card as Card exposing (Card)
-
 
 type alias VoteIO =
     { player : NonEmptyString 

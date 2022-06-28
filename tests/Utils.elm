@@ -12,3 +12,13 @@ inRoom room test =
         |> Maybe.map Routes.Room
         |> Maybe.map (\route -> \_ -> test route)
         |> Maybe.withDefault (\_ -> Expect.fail "dabest was rejected as a room name")
+
+
+withMaybe : Maybe a -> (a -> Expect.Expectation) -> () -> Expect.Expectation
+withMaybe it test _ =
+    case it of
+        Just b ->
+            test b
+
+        Nothing ->
+            Expect.fail "Expected a value to start the test"

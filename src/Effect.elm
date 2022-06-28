@@ -2,6 +2,9 @@ module Effect exposing (..)
 
 import Browser.Navigation
 import Routes exposing (Route)
+import Json.Encode as Json
+
+port vote : Json.Value -> Cmd msg
 
 
 type Effect
