@@ -78,7 +78,7 @@ update msg model =
                 -- TODO HMP do something with the error
                 Validate ->
                     -- TODO HMP do some error handling here, maybe display a help message
-                    case ( Domain.Nickname.fromString subModel.nickname, subModel.playerId ) of
+                    case ( Domain.Nickname.create subModel.nickname, subModel.playerId ) of
                         ( Just nickname, Just playerId ) ->
                             Ready { player = { nickname = nickname, id = playerId } }
 

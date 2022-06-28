@@ -31,7 +31,7 @@ all =
 setup : List Test
 setup =
     [ test "a guest arriving in a room is displayed the nickname field" <|
-        withMaybe3 ( Room.fromString "dabest", PlayerId.create "ba-id", Nickname.fromString "ba" ) <|
+        withMaybe3 ( Room.fromString "dabest", PlayerId.create "ba-id", Nickname.create "ba" ) <|
             \( room, id, nickname ) ->
                 startAppOn (Routes.Room room)
                     |> withPlayerId id
@@ -46,7 +46,7 @@ setup =
                         (Expect.equal [ Player.Player id nickname ])
                     |> done
     , test "share the player's identity when they initialize the room also" <|
-        withMaybe2 ( PlayerId.create "emma-id", Nickname.fromString "Emma" ) <|
+        withMaybe2 ( PlayerId.create "emma-id", Nickname.create "Emma" ) <|
             \( id, nickname ) ->
                 joinWithPlayerId { room = "dabest", player = { nickname = Nickname.print nickname, id = id } }
                     |> ensureOutgoingPortValues

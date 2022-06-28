@@ -13,7 +13,7 @@ all : Test
 all =
     describe "Player"
         [ test "serializes and deserializes to the same object" <|
-            withMaybe2 ( Nickname.fromString "Jane", PlayerId.create "jane-id" ) <|
+            withMaybe2 ( Nickname.create "Jane", PlayerId.create "jane-id" ) <|
                 \( nickname, id ) ->
                     { id = id, nickname = nickname }
                         |> Player.json

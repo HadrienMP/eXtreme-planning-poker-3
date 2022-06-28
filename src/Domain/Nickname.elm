@@ -1,4 +1,4 @@
-module Domain.Nickname exposing (Nickname, decoder, fromString, json, print)
+module Domain.Nickname exposing (Nickname, create, decoder, json, print)
 
 import Json.Decode as Decode
 import Json.Encode as Json
@@ -9,8 +9,8 @@ type Nickname
     = Nickname NES.NonEmptyString
 
 
-fromString : String -> Maybe Nickname
-fromString raw =
+create : String -> Maybe Nickname
+create raw =
     NES.create raw |> Maybe.map Nickname
 
 
