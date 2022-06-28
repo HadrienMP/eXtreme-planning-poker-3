@@ -1,5 +1,6 @@
 module TestSetup exposing (..)
 
+import Domain.Vote as Vote
 import Effect exposing (Effect(..))
 import Html.Attributes
 import Json.Decode
@@ -65,6 +66,9 @@ simulateEffects effect =
 
         LoadUrl url ->
             SimulatedEffect.Navigation.load url
+
+        ShareVote vote ->
+            SimulatedEffect.Ports.send "votes" (Vote.json vote)
 
 
 simulateSubscriptions : Main.Model () -> ProgramTest.SimulatedSub Main.Msg

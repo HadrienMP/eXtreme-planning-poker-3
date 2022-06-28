@@ -1,16 +1,19 @@
-module Effect exposing (..)
+port module Effect exposing (..)
 
 import Browser.Navigation
-import Routes exposing (Route)
+import Domain.Vote as Vote exposing (Vote)
 import Json.Encode as Json
+import Routes exposing (Route)
 
-port vote : Json.Value -> Cmd msg
+
+port votes : Json.Value -> Cmd msg
 
 
 type Effect
     = None
     | PushUrl String
     | LoadUrl String
+    | ShareVote Vote
 
 
 perform : Browser.Navigation.Key -> Effect -> Cmd msg
@@ -25,11 +28,13 @@ perform key effect =
         LoadUrl url ->
             Browser.Navigation.load url
 
+        ShareVote vote ->
+            vote |> Vote.json |> votes
+
 
 none : Effect
 none =
     None
-
 
 
 
@@ -39,6 +44,8 @@ none =
 pushUrl : String -> Effect
 pushUrl =
     PushUrl
+
+
 pushRoute : Route -> Effect
 pushRoute route =
     PushUrl <| Routes.toString route

@@ -1,19 +1,17 @@
 module Pages.RoomTests exposing (..)
 
+import Domain.Card as Card
+import Domain.Vote as Vote
 import Effect exposing (Effect)
 import Expect
-import FeatherIcons exposing (play)
 import Lib.NonEmptyString as NES exposing (NonEmptyString)
 import Main
-import Pages.Room exposing (Msg(..))
 import ProgramTest exposing (..)
 import Routes
 import Test exposing (..)
 import Test.Html.Selector as Selector
 import TestSetup exposing (..)
 import Utils exposing (..)
-import IO.VoteIO as VoteIO exposing (VoteIO)
-import Domain.Card as Card
 
 
 all : Test
@@ -84,8 +82,7 @@ choosingCards =
     [ test "click a card on your deck to choose a card" <|
         withMaybe (NES.create "playerId-joba") <|
             \playerId ->
-                join { room = "dabest", player = "Joba" }
-                    |> withPlayerId playerId
+                joinWithPlayerId { room = "dabest", player = { nickname = "Joba", id = playerId } }
                     |> clickButton "TFB"
                     |> clickButton "Reveal"
                     |> ensureViewHas
@@ -95,9 +92,9 @@ choosingCards =
                             ]
                         ]
                     |> ensureOutgoingPortValues
-                        "vote"
-                        VoteIO.decoder
-                        (Expect.equal [ VoteIO playerId (Card.fromString "TFB") ])
+                        "votes"
+                        Vote.decoder
+                        (Expect.equal [ Vote.Vote playerId (Card.fromString "TFB") ])
                     |> done
     , test "before revealing cards are hidden" <|
         \_ ->
@@ -183,4 +180,13 @@ join { room, player } =
         |> withAPlayerId
         |> writeInField { id = "room", label = "Room", value = room }
         |> writeInField { id = "nickname", label = "Nickname", value = player }
+        |> clickButton "Join"
+
+
+joinWithPlayerId : { a | room : String, player : { nickname : String, id : NonEmptyString } } -> ProgramTest (Main.Model ()) Main.Msg Effect
+joinWithPlayerId { room, player } =
+    startAppOn Routes.Home
+        |> withPlayerId player.id
+        |> writeInField { id = "room", label = "Room", value = room }
+        |> writeInField { id = "nickname", label = "Nickname", value = player.nickname }
         |> clickButton "Join"

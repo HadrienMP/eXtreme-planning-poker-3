@@ -1,17 +1,18 @@
-port module IO.VoteIO exposing (..)
+module Domain.Vote exposing (..)
 
+import Domain.Card as Card exposing (Card)
 import Json.Decode as Decode
 import Json.Encode as Json
 import Lib.NonEmptyString as NES exposing (NonEmptyString)
-import Domain.Card as Card exposing (Card)
 
-type alias VoteIO =
-    { player : NonEmptyString 
-    , card : Card 
+
+type alias Vote =
+    { player : NonEmptyString
+    , card : Card
     }
 
 
-json : VoteIO -> Json.Value
+json : Vote -> Json.Value
 json vote =
     Json.object
         [ ( "player", vote.player |> NES.print |> Json.string )
@@ -19,8 +20,8 @@ json vote =
         ]
 
 
-decoder : Decode.Decoder VoteIO
+decoder : Decode.Decoder Vote
 decoder =
-    Decode.map2 VoteIO 
+    Decode.map2 Vote
         (Decode.field "player" NES.decoder)
         (Decode.field "card" Card.decoder)

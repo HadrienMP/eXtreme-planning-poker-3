@@ -1,8 +1,8 @@
-module IO.VoteIOTests exposing (..)
+module Domain.VoteTests exposing (..)
 
 import Domain.Card as Card
+import Domain.Vote as Vote
 import Expect
-import IO.VoteIO
 import Json.Decode
 import Lib.NonEmptyString as NES
 import Test exposing (..)
@@ -11,12 +11,12 @@ import Utils exposing (..)
 
 all : Test
 all =
-    describe "VoteIO"
+    describe "Vote"
         [ test "serializes and deserializes to the same object" <|
             withMaybe (NES.create "playerId") <|
                 \playerId ->
                     { player = playerId, card = Card.fromString "1" }
-                        |> IO.VoteIO.json
-                        |> Json.Decode.decodeValue IO.VoteIO.decoder
+                        |> Vote.json
+                        |> Json.Decode.decodeValue Vote.decoder
                         |> Expect.equal (Result.Ok { player = playerId, card = Card.fromString "1" })
         ]

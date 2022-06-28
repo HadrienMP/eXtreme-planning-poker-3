@@ -3,6 +3,7 @@ module Pages.Room exposing (..)
 import Domain.Card exposing (Card)
 import Domain.Nickname exposing (Nickname)
 import Domain.RoomName exposing (RoomName)
+import Domain.Vote exposing (Vote)
 import Effect
 import Element exposing (..)
 import Element.Border as Border
@@ -54,7 +55,7 @@ init _ room =
 
 type Msg
     = GotSharedMsg Shared.Msg
-    | Vote Card
+    | Voted Vote
     | Reveal
     | Restart
 
@@ -68,18 +69,18 @@ update shared msg model =
             , effect = Effect.none
             }
 
-        Vote card ->
+        Voted vote ->
             { model =
                 { model
                     | vote =
-                        if Just card == model.vote then
+                        if Just vote.card == model.vote then
                             Nothing
 
                         else
-                            Just card
+                            Just vote.card
                 }
             , shared = shared
-            , effect = Effect.none
+            , effect = Effect.ShareVote vote
             }
 
         Reveal ->
@@ -115,19 +116,19 @@ view shared model =
                 , setupView setupModel
                 ]
 
-        Shared.Ready { nickname } ->
-            playingView nickname model
+        Shared.Ready ready ->
+            playingView ready model
 
 
-playingView : Nickname -> Model -> Element Msg
-playingView nickname model =
+playingView : Shared.Complete -> Model -> Element Msg
+playingView shared model =
     column [ spacing 30, pageWidth ]
         [ el (Theme.Theme.bottomBorder ++ [ width fill ]) <| title model
         , wrappedRow [ spaceEvenly, spacing 10 ]
-            [ displayCardSlot model nickname
+            [ displayCardSlot model shared.nickname
             , revealRestartButton model
             ]
-        , displayDeck model nickname
+        , displayDeck model shared
         ]
 
 
@@ -151,8 +152,8 @@ displayCardSlot model nickname =
         ]
 
 
-displayDeck : Model -> Nickname -> Element Msg
-displayDeck model nickname =
+displayDeck : Model -> Shared.Complete -> Element Msg
+displayDeck model shared =
     case model.state of
         Choosing ->
             column
@@ -169,9 +170,9 @@ displayDeck model nickname =
                     , paddingEach { emptySides | bottom = 12 }
                     ]
                     [ FeatherIcons.user |> featherIconToElement { shadow = True }
-                    , ellipsisText [ clipX, Font.bold ] <| Domain.Nickname.print nickname
+                    , ellipsisText [ clipX, Font.bold ] <| Domain.Nickname.print shared.nickname
                     ]
-                , displayDeckCards model.vote
+                , displayDeckCards model.vote shared
                 ]
 
         Chosen ->
@@ -231,13 +232,13 @@ title model =
         ]
 
 
-displayDeckCards : Maybe Card -> Element Msg
-displayDeckCards selected =
-    row [ spacing 10, centerX ] <| List.map (displayCard selected) <| deck
+displayDeckCards : Maybe Card -> Shared.Complete -> Element Msg
+displayDeckCards selected shared =
+    row [ spacing 10, centerX ] <| List.map (displayCard selected shared) <| deck
 
 
-displayCard : Maybe Card -> Card -> Element Msg
-displayCard selected card =
+displayCard : Maybe Card -> Shared.Complete -> Card -> Element Msg
+displayCard selected shared card =
     Input.button
         [ moveUp <|
             if Just card == selected then
@@ -252,6 +253,6 @@ displayCard selected card =
             else
                 0.8
         ]
-        { onPress = Just <| Vote card
+        { onPress = Just <| Voted <| Vote shared.playerId card
         , label = Theme.Card.front { label = Domain.Card.print card }
         }
