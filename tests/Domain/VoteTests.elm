@@ -15,8 +15,8 @@ all =
         [ test "serializes and deserializes to the same object" <|
             withMaybe (NES.create "playerId") <|
                 \playerId ->
-                    { player = playerId, card = Card.fromString "1" }
+                    { player = playerId, card = Just <| Card.fromString "1" }
                         |> Vote.json
                         |> Json.Decode.decodeValue Vote.decoder
-                        |> Expect.equal (Result.Ok { player = playerId, card = Card.fromString "1" })
+                        |> Expect.equal (Result.Ok { player = playerId, card = Just <| Card.fromString "1" })
         ]

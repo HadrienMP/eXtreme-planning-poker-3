@@ -94,7 +94,7 @@ choosingCards =
                     |> ensureOutgoingPortValues
                         "votes"
                         Vote.decoder
-                        (Expect.equal [ Vote.Vote playerId (Card.fromString "TFB") ])
+                        (Expect.equal [ Vote.Vote playerId (Just <| Card.fromString "TFB") ])
                     |> done
     , test "before revealing cards are hidden" <|
         \_ ->
@@ -108,18 +108,27 @@ choosingCards =
                     ]
                 |> done
     , test "click a card again to cancel the vote" <|
-        \_ ->
-            join { room = "dabest", player = "Joba" }
-                |> clickButton "TFB"
-                |> clickButton "TFB"
-                |> clickButton "Reveal"
-                |> ensureViewHasNot
-                    [ Selector.all
-                        [ Selector.class "card-slot"
-                        , Selector.containing [ Selector.text "TFB" ]
+        withMaybe (NES.create "playerId-joba") <|
+            \playerId ->
+                joinWithPlayerId { room = "dabest", player = { nickname = "Joba", id = playerId } }
+                    |> clickButton "TFB"
+                    |> clickButton "TFB"
+                    |> clickButton "Reveal"
+                    |> ensureViewHasNot
+                        [ Selector.all
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text "TFB" ]
+                            ]
                         ]
-                    ]
-                |> done
+                    |> ensureOutgoingPortValues
+                        "votes"
+                        Vote.decoder
+                        (Expect.equal
+                            [ Vote.Vote playerId (Just <| Card.fromString "TFB")
+                            , Vote.Vote playerId Nothing
+                            ]
+                        )
+                    |> done
     , test "clicking a card then another changes the vote" <|
         \_ ->
             join { room = "dabest", player = "Joba" }

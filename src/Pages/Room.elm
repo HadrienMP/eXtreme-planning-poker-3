@@ -70,15 +70,7 @@ update shared msg model =
             }
 
         Voted vote ->
-            { model =
-                { model
-                    | vote =
-                        if Just vote.card == model.vote then
-                            Nothing
-
-                        else
-                            Just vote.card
-                }
+            { model = { model | vote = vote.card }
             , shared = shared
             , effect = Effect.ShareVote vote
             }
@@ -253,6 +245,12 @@ displayCard selected shared card =
             else
                 0.8
         ]
-        { onPress = Just <| Voted <| Vote shared.playerId card
+        { onPress =
+            Just <|
+                if Just card == selected then
+                    Voted <| Vote shared.playerId Maybe.Nothing
+
+                else
+                    Voted <| Vote shared.playerId (Just card)
         , label = Theme.Card.front { label = Domain.Card.print card }
         }
