@@ -22,3 +22,13 @@ withMaybe it test _ =
 
         Nothing ->
             Expect.fail "Expected a value to start the test"
+
+
+withMaybe2 : ( Maybe a, Maybe b ) -> (( a, b ) -> Expect.Expectation) -> () -> Expect.Expectation
+withMaybe2 tuple test _ =
+    case tuple of
+        ( Just a, Just b ) ->
+            test ( a, b )
+
+        _ ->
+            Expect.fail "Expected values to start the test"
