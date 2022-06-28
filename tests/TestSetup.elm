@@ -2,12 +2,13 @@ module TestSetup exposing (..)
 
 import Domain.GameState as GameState
 import Domain.Player as Player
+import Domain.PlayerId as PlayerId exposing (PlayerId)
 import Domain.Vote as Vote
 import Effect exposing (AtomicEffect(..), Effect(..))
 import Html.Attributes
 import Json.Decode
 import Json.Encode
-import Lib.NonEmptyString as NonEmptyString exposing (NonEmptyString)
+import Lib.NonEmptyString as NonEmptyString
 import Main
 import ProgramTest exposing (..)
 import Routes exposing (Route)
@@ -49,11 +50,11 @@ withAPlayerId test =
             )
 
 
-withPlayerId : NonEmptyString -> ProgramTest (Main.Model ()) Main.Msg Effect -> ProgramTest (Main.Model ()) Main.Msg Effect
+withPlayerId : PlayerId -> ProgramTest (Main.Model ()) Main.Msg Effect -> ProgramTest (Main.Model ()) Main.Msg Effect
 withPlayerId playerId test =
     simulateIncomingPort
         "playerId"
-        (NonEmptyString.json playerId)
+        (PlayerId.json playerId)
         test
 
 

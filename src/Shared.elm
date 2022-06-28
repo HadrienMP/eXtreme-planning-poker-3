@@ -2,10 +2,10 @@ port module Shared exposing (..)
 
 import Domain.Nickname
 import Domain.Player exposing (Player)
+import Domain.PlayerId as PlayerId exposing (PlayerId)
 import Element exposing (Element)
 import FeatherIcons
 import Json.Decode
-import Lib.NonEmptyString as NonEmptyString exposing (NonEmptyString)
 import Theme.Input
 import Theme.Theme exposing (featherIconToElement)
 
@@ -21,7 +21,7 @@ port playerIdPort : (Json.Decode.Value -> msg) -> Sub msg
 
 type alias Incomplete =
     { nickname : String
-    , playerId : Maybe NonEmptyString
+    , playerId : Maybe PlayerId
     }
 
 
@@ -71,7 +71,7 @@ update msg model =
 
                 GotPlayerId json ->
                     json
-                        |> Json.Decode.decodeValue NonEmptyString.decoder
+                        |> Json.Decode.decodeValue PlayerId.decoder
                         |> Result.toMaybe
                         |> (\it -> SettingUp { subModel | playerId = it })
 

@@ -4,11 +4,11 @@ import Domain.Card as Card
 import Domain.GameState as GameState
 import Domain.Nickname as Nickname
 import Domain.Player as Player
+import Domain.PlayerId as PlayerId exposing (PlayerId)
 import Domain.RoomName as Room
 import Domain.Vote as Vote
 import Effect exposing (Effect)
 import Expect
-import Lib.NonEmptyString as NES exposing (NonEmptyString)
 import Main
 import ProgramTest exposing (..)
 import Routes
@@ -31,7 +31,7 @@ all =
 setup : List Test
 setup =
     [ test "a guest arriving in a room is displayed the nickname field" <|
-        withMaybe3 ( Room.fromString "dabest", NES.create "ba-id", Nickname.fromString "ba" ) <|
+        withMaybe3 ( Room.fromString "dabest", PlayerId.create "ba-id", Nickname.fromString "ba" ) <|
             \( room, id, nickname ) ->
                 startAppOn (Routes.Room room)
                     |> withPlayerId id
@@ -46,7 +46,7 @@ setup =
                         (Expect.equal [ Player.Player id nickname ])
                     |> done
     , test "share the player's identity when they initialize the room also" <|
-        withMaybe2 ( NES.create "emma-id", Nickname.fromString "Emma" ) <|
+        withMaybe2 ( PlayerId.create "emma-id", Nickname.fromString "Emma" ) <|
             \( id, nickname ) ->
                 joinWithPlayerId { room = "dabest", player = { nickname = Nickname.print nickname, id = id } }
                     |> ensureOutgoingPortValues
@@ -101,7 +101,7 @@ cardsRevealed =
 choosingCards : List Test
 choosingCards =
     [ test "click a card on your deck to choose a card" <|
-        withMaybe (NES.create "playerId-joba") <|
+        withMaybe (PlayerId.create "playerId-joba") <|
             \playerId ->
                 joinWithPlayerId { room = "dabest", player = { nickname = "Joba", id = playerId } }
                     |> clickButton "TFB"
@@ -129,7 +129,7 @@ choosingCards =
                     ]
                 |> done
     , test "click a card again to cancel the vote" <|
-        withMaybe (NES.create "playerId-joba") <|
+        withMaybe (PlayerId.create "playerId-joba") <|
             \playerId ->
                 joinWithPlayerId { room = "dabest", player = { nickname = "Joba", id = playerId } }
                     |> clickButton "TFB"
@@ -229,7 +229,7 @@ join { room, player } =
         |> clickButton "Join"
 
 
-joinWithPlayerId : { a | room : String, player : { nickname : String, id : NonEmptyString } } -> ProgramTest (Main.Model ()) Main.Msg Effect
+joinWithPlayerId : { a | room : String, player : { nickname : String, id : PlayerId } } -> ProgramTest (Main.Model ()) Main.Msg Effect
 joinWithPlayerId { room, player } =
     startAppOn Routes.Home
         |> withPlayerId player.id

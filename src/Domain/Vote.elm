@@ -1,13 +1,13 @@
 module Domain.Vote exposing (..)
 
 import Domain.Card as Card exposing (Card)
+import Domain.PlayerId as PlayerId exposing (PlayerId)
 import Json.Decode as Decode
 import Json.Encode as Json
-import Lib.NonEmptyString as NES exposing (NonEmptyString)
 
 
 type alias Vote =
-    { player : NonEmptyString
+    { player : PlayerId
     , card : Maybe Card
     }
 
@@ -15,7 +15,7 @@ type alias Vote =
 json : Vote -> Json.Value
 json vote =
     Json.object
-        [ ( "player", vote.player |> NES.print |> Json.string )
+        [ ( "player", vote.player |> PlayerId.print |> Json.string )
         , ( "card", vote.card |> Maybe.map (Card.print >> Json.string) |> Maybe.withDefault Json.null )
         ]
 
@@ -23,5 +23,5 @@ json vote =
 decoder : Decode.Decoder Vote
 decoder =
     Decode.map2 Vote
-        (Decode.field "player" NES.decoder)
+        (Decode.field "player" PlayerId.decoder)
         (Decode.maybe <| Decode.field "card" Card.decoder)
