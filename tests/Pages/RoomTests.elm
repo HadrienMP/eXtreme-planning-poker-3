@@ -83,6 +83,10 @@ cardsRevealed =
                         , Selector.containing [ Selector.all [ Selector.text "TFB", Selector.text "Jojo" ] ]
                         ]
                     ]
+                |> ensureOutgoingPortValues
+                    "states"
+                    GameState.decoder
+                    (Expect.equal [ GameState.Chosen, GameState.Choosing ])
                 |> done
     , test "clicking on restart reveals the deck" <|
         \_ ->

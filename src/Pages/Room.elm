@@ -97,7 +97,7 @@ update shared msg model =
         Restart ->
             { model = { model | state = Choosing, vote = Nothing }
             , shared = shared
-            , effect = Effect.none
+            , effect = Effect.shareState Choosing
             }
 
 
