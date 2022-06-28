@@ -1,6 +1,7 @@
 port module Effect exposing (..)
 
 import Browser.Navigation
+import Domain.GameState as GameState exposing (GameState)
 import Domain.Player as Player exposing (Player)
 import Domain.Vote as Vote exposing (Vote)
 import Json.Encode as Json
@@ -13,12 +14,16 @@ port votes : Json.Value -> Cmd msg
 port player : Json.Value -> Cmd msg
 
 
+port states : Json.Value -> Cmd msg
+
+
 type AtomicEffect
     = None
     | PushUrl String
     | LoadUrl String
     | ShareVote Vote
     | SharePlayer Player
+    | ShareState GameState
 
 
 type Effect
@@ -56,6 +61,9 @@ performAtomic key effect =
         SharePlayer toShare ->
             toShare |> Player.json |> player
 
+        ShareState toShare ->
+            toShare |> GameState.json |> states
+
 
 none : Effect
 none =
@@ -92,6 +100,11 @@ sharePlayer =
 shareVote : Vote -> Effect
 shareVote =
     Atomic << ShareVote
+
+
+shareState : GameState -> Effect
+shareState =
+    Atomic << ShareState
 
 
 

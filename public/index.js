@@ -7,3 +7,4 @@ const app = Elm.Main.init();
 app.ports.playerIdPort.send(nanoid(6));
 app.ports.votes.subscribe(log("vote"));
 app.ports.player.subscribe(log("player"));
+app.ports.states.subscribe(log("state"));

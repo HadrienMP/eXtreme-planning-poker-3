@@ -1,6 +1,7 @@
 module Pages.RoomTests exposing (..)
 
 import Domain.Card as Card
+import Domain.GameState as GameState
 import Domain.Nickname as Nickname
 import Domain.Player as Player
 import Domain.RoomName as Room
@@ -157,6 +158,22 @@ choosingCards =
                         , Selector.containing [ Selector.text "1" ]
                         ]
                     ]
+                |> done
+    , test "clicking Reveal reveals the votes" <|
+        \_ ->
+            join { room = "dabest", player = "Joba" }
+                |> clickButton "TFB"
+                |> clickButton "Reveal"
+                |> ensureViewHas
+                    [ Selector.all
+                        [ Selector.class "card-slot"
+                        , Selector.containing [ Selector.text "TFB" ]
+                        ]
+                    ]
+                |> ensureOutgoingPortValues
+                    "states"
+                    GameState.decoder
+                    (Expect.equal [ GameState.Chosen ])
                 |> done
     ]
 

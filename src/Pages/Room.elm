@@ -1,6 +1,7 @@
 module Pages.Room exposing (..)
 
 import Domain.Card exposing (Card)
+import Domain.GameState exposing (GameState(..))
 import Domain.Nickname exposing (Nickname)
 import Domain.RoomName exposing (RoomName)
 import Domain.Vote exposing (Vote)
@@ -27,15 +28,10 @@ import Theme.Theme exposing (ellipsisText, emptySides, featherIconToElement, pag
 --
 
 
-type State
-    = Choosing
-    | Chosen
-
-
 type alias Model =
     { room : RoomName
     , vote : Maybe Card
-    , state : State
+    , state : GameState
     }
 
 
@@ -95,7 +91,7 @@ update shared msg model =
         Reveal ->
             { model = { model | state = Chosen }
             , shared = shared
-            , effect = Effect.none
+            , effect = Effect.shareState Chosen
             }
 
         Restart ->

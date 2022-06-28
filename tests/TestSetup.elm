@@ -1,5 +1,6 @@
 module TestSetup exposing (..)
 
+import Domain.GameState as GameState
 import Domain.Player as Player
 import Domain.Vote as Vote
 import Effect exposing (AtomicEffect(..), Effect(..))
@@ -83,6 +84,9 @@ simulateAtomicEffects effect =
 
         SharePlayer player ->
             SimulatedEffect.Ports.send "player" (Player.json player)
+
+        ShareState state ->
+            SimulatedEffect.Ports.send "states" (GameState.json state)
 
 
 simulateSubscriptions : Main.Model () -> ProgramTest.SimulatedSub Main.Msg
