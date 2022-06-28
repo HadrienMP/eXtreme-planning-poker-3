@@ -4,6 +4,7 @@ import AssocList as Dict exposing (Dict)
 import Domain.Card exposing (Card)
 import Domain.GameState exposing (GameState(..))
 import Domain.Nickname exposing (Nickname)
+import Domain.Player as Player
 import Domain.PlayerId exposing (PlayerId)
 import Domain.RoomName exposing (RoomName)
 import Domain.Vote exposing (Vote)
@@ -15,6 +16,7 @@ import Element.Input as Input
 import Element.Region as Region
 import FeatherIcons
 import Html.Attributes
+import Json.Decode as Decode
 import Lib.UpdateResult exposing (UpdateResult)
 import Shared
 import Theme.Attributes
@@ -55,6 +57,7 @@ init shared room =
 
 type Msg
     = GotSharedMsg Shared.Msg
+    | GotPlayer Decode.Value
     | Voted Vote
     | Reveal
     | Restart
@@ -109,6 +112,28 @@ update shared msg model =
             , shared = shared
             , effect = Effect.shareState Choosing
             }
+
+        GotPlayer json ->
+            case Decode.decodeValue Player.decoder json of
+                Ok player ->
+                    { model = { model | players = Dict.insert player.id player.nickname model.players }
+                    , shared = shared
+                    , effect = Effect.none
+                    }
+
+                Err _ ->
+                    Debug.todo "log this with a real port"
+
+
+
+--
+-- Subscriptions
+--
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Player.playersIn GotPlayer
 
 
 addPlayer : Shared.Model -> Dict PlayerId Nickname -> Dict PlayerId Nickname

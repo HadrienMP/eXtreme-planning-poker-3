@@ -100,10 +100,73 @@ cardsRevealed =
 
 choosingCards : List Test
 choosingCards =
-    [ test "click a card on your deck to choose a card" <|
-        withMaybe (PlayerId.create "playerId-joba") <|
-            \playerId ->
-                joinWithPlayerId { room = "dabest", player = { nickname = "Joba", id = playerId } }
+    [ describe "my actions"
+        [ test "click a card on your deck to choose a card" <|
+            withMaybe (PlayerId.create "playerId-joba") <|
+                \playerId ->
+                    joinWithPlayerId { room = "dabest", player = { nickname = "Joba", id = playerId } }
+                        |> clickButton "TFB"
+                        |> clickButton "Reveal"
+                        |> ensureViewHas
+                            [ Selector.all
+                                [ Selector.class "card-slot"
+                                , Selector.containing [ Selector.text "TFB" ]
+                                ]
+                            ]
+                        |> ensureOutgoingPortValues
+                            "votes"
+                            Vote.decoder
+                            (Expect.equal [ Vote.Vote playerId (Just <| Card.fromString "TFB") ])
+                        |> done
+        , test "before revealing cards are hidden" <|
+            \_ ->
+                join { room = "dabest", player = "Joba" }
+                    |> clickButton "TFB"
+                    |> ensureViewHasNot
+                        [ Selector.all
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text "TFB" ]
+                            ]
+                        ]
+                    |> done
+        , test "click a card again to cancel the vote" <|
+            withMaybe (PlayerId.create "playerId-joba") <|
+                \playerId ->
+                    joinWithPlayerId { room = "dabest", player = { nickname = "Joba", id = playerId } }
+                        |> clickButton "TFB"
+                        |> clickButton "TFB"
+                        |> clickButton "Reveal"
+                        |> ensureViewHasNot
+                            [ Selector.all
+                                [ Selector.class "card-slot"
+                                , Selector.containing [ Selector.text "TFB" ]
+                                ]
+                            ]
+                        |> ensureOutgoingPortValues
+                            "votes"
+                            Vote.decoder
+                            (Expect.equal
+                                [ Vote.Vote playerId (Just <| Card.fromString "TFB")
+                                , Vote.Vote playerId Nothing
+                                ]
+                            )
+                        |> done
+        , test "clicking a card then another changes the vote" <|
+            \_ ->
+                join { room = "dabest", player = "Joba" }
+                    |> clickButton "TFB"
+                    |> clickButton "1"
+                    |> clickButton "Reveal"
+                    |> ensureViewHas
+                        [ Selector.all
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text "1" ]
+                            ]
+                        ]
+                    |> done
+        , test "clicking Reveal reveals the votes" <|
+            \_ ->
+                join { room = "dabest", player = "Joba" }
                     |> clickButton "TFB"
                     |> clickButton "Reveal"
                     |> ensureViewHas
@@ -113,72 +176,25 @@ choosingCards =
                             ]
                         ]
                     |> ensureOutgoingPortValues
-                        "votes"
-                        Vote.decoder
-                        (Expect.equal [ Vote.Vote playerId (Just <| Card.fromString "TFB") ])
+                        "states"
+                        GameState.decoder
+                        (Expect.equal [ GameState.Chosen ])
                     |> done
-    , test "before revealing cards are hidden" <|
-        \_ ->
-            join { room = "dabest", player = "Joba" }
-                |> clickButton "TFB"
-                |> ensureViewHasNot
-                    [ Selector.all
-                        [ Selector.class "card-slot"
-                        , Selector.containing [ Selector.text "TFB" ]
-                        ]
-                    ]
-                |> done
-    , test "click a card again to cancel the vote" <|
-        withMaybe (PlayerId.create "playerId-joba") <|
-            \playerId ->
-                joinWithPlayerId { room = "dabest", player = { nickname = "Joba", id = playerId } }
-                    |> clickButton "TFB"
-                    |> clickButton "TFB"
-                    |> clickButton "Reveal"
-                    |> ensureViewHasNot
-                        [ Selector.all
-                            [ Selector.class "card-slot"
-                            , Selector.containing [ Selector.text "TFB" ]
+        ]
+    , describe "peer actions"
+        [ test "Emma joined" <|
+            withPlayer "emma" <|
+                \emma ->
+                    join { room = "dabest", player = "Pierre" }
+                        |> simulateIncomingPort "playersIn" (Player.json emma)
+                        |> ensureViewHas
+                            [ Selector.all
+                                [ Selector.class "card-slot"
+                                , Selector.containing [ Selector.text <| Nickname.print <| emma.nickname ]
+                                ]
                             ]
-                        ]
-                    |> ensureOutgoingPortValues
-                        "votes"
-                        Vote.decoder
-                        (Expect.equal
-                            [ Vote.Vote playerId (Just <| Card.fromString "TFB")
-                            , Vote.Vote playerId Nothing
-                            ]
-                        )
-                    |> done
-    , test "clicking a card then another changes the vote" <|
-        \_ ->
-            join { room = "dabest", player = "Joba" }
-                |> clickButton "TFB"
-                |> clickButton "1"
-                |> clickButton "Reveal"
-                |> ensureViewHas
-                    [ Selector.all
-                        [ Selector.class "card-slot"
-                        , Selector.containing [ Selector.text "1" ]
-                        ]
-                    ]
-                |> done
-    , test "clicking Reveal reveals the votes" <|
-        \_ ->
-            join { room = "dabest", player = "Joba" }
-                |> clickButton "TFB"
-                |> clickButton "Reveal"
-                |> ensureViewHas
-                    [ Selector.all
-                        [ Selector.class "card-slot"
-                        , Selector.containing [ Selector.text "TFB" ]
-                        ]
-                    ]
-                |> ensureOutgoingPortValues
-                    "states"
-                    GameState.decoder
-                    (Expect.equal [ GameState.Chosen ])
-                |> done
+                        |> done
+        ]
     ]
 
 

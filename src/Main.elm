@@ -141,7 +141,18 @@ handleUpdateResult model page result =
 
 subscriptions : Model key -> Sub Msg
 subscriptions model =
-    Shared.subscriptions model.shared |> Sub.map GotSharedMsg
+    Sub.batch
+        [ Shared.subscriptions model.shared |> Sub.map GotSharedMsg
+        , case model.page of
+            Room room ->
+                Pages.Room.subscriptions room |> Sub.map GotRoomMsg
+
+            NotFound ->
+                Sub.none
+
+            Home _ ->
+                Sub.none
+        ]
 
 
 

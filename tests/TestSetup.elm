@@ -10,12 +10,14 @@ import Json.Decode
 import Json.Encode
 import Lib.NonEmptyString as NonEmptyString
 import Main
+import Pages.Room
 import ProgramTest exposing (..)
 import Routes exposing (Route)
 import Shared
 import SimulatedEffect.Cmd
 import SimulatedEffect.Navigation
 import SimulatedEffect.Ports
+import SimulatedEffect.Sub
 import Test.Html.Selector as Selector
 
 
@@ -93,9 +95,14 @@ simulateAtomicEffects effect =
 simulateSubscriptions : Main.Model () -> ProgramTest.SimulatedSub Main.Msg
 simulateSubscriptions _ =
     -- TODO HMP extract a portsList
-    SimulatedEffect.Ports.subscribe "playerId"
-        Json.Decode.value
-        (Main.GotSharedMsg << Shared.GotPlayerId)
+    SimulatedEffect.Sub.batch
+        [ SimulatedEffect.Ports.subscribe "playerId"
+            Json.Decode.value
+            (Main.GotSharedMsg << Shared.GotPlayerId)
+        , SimulatedEffect.Ports.subscribe "playersIn"
+            Json.Decode.value
+            (Main.GotRoomMsg << Pages.Room.GotPlayer)
+        ]
 
 
 writeInField : { id : String, label : String, value : String } -> ProgramTest model msg effect -> ProgramTest model msg effect

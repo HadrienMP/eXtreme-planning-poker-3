@@ -1,5 +1,8 @@
 module Utils exposing (..)
 
+import Domain.Nickname as Nickname
+import Domain.Player exposing (Player)
+import Domain.PlayerId as PlayerId
 import Domain.RoomName
 import Expect
 import Routes
@@ -8,6 +11,12 @@ import Routes
 inRoom : String -> (Routes.Route -> Expect.Expectation) -> () -> Expect.Expectation
 inRoom room testF =
     withMaybe (Domain.RoomName.fromString room) (Routes.Room >> testF)
+
+
+withPlayer : String -> (Player -> Expect.Expectation) -> () -> Expect.Expectation
+withPlayer nickname testF =
+    withMaybe2 ( PlayerId.create <| "id-of-" ++ nickname, Nickname.create nickname ) <|
+        \( id, nick ) -> testF <| Player id nick
 
 
 withMaybe : Maybe a -> (a -> Expect.Expectation) -> () -> Expect.Expectation
