@@ -231,26 +231,21 @@ displayDeckCards selected shared =
 
 displayCard : Maybe Card -> Shared.Complete -> Card -> Element Msg
 displayCard selected shared card =
-    Input.button
-        [ moveUp <|
-            if Just card == selected then
-                8
+    if Just card == selected then
+        Input.button [ moveUp 8 ]
+            { onPress = Vote shared.playerId Maybe.Nothing |> Voted |> Just
+            , label = Theme.Card.front { label = Domain.Card.print card }
+            }
 
-            else
-                0
-        , alpha <|
-            if Just card == selected || selected == Nothing then
-                1
-
-            else
-                0.8
-        ]
-        { onPress =
-            Just <|
-                if Just card == selected then
-                    Voted <| Vote shared.playerId Maybe.Nothing
+    else
+        Input.button
+            [ alpha <|
+                if selected == Nothing then
+                    1
 
                 else
-                    Voted <| Vote shared.playerId (Just card)
-        , label = Theme.Card.front { label = Domain.Card.print card }
-        }
+                    0.8
+            ]
+            { onPress = Just <| Voted <| Vote shared.playerId (Just card)
+            , label = Theme.Card.front { label = Domain.Card.print card }
+            }
