@@ -83,7 +83,7 @@ update shared msg model =
             , effect =
                 case updated of
                     Shared.Ready { player } ->
-                        Effect.sharePlayer player
+                        Effect.sharePlayer model.room player
 
                     _ ->
                         Effect.none

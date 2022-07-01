@@ -2,7 +2,7 @@ module Effect exposing (..)
 
 import Browser.Navigation
 import Domain.GameState as GameState exposing (GameState, statesOut)
-import Domain.Player as Player exposing (Player, playerOut)
+import Domain.Player as Player exposing (Player)
 import Domain.RoomName exposing (RoomName)
 import Domain.Vote as Vote exposing (Vote)
 import Routes exposing (Route)
@@ -13,7 +13,7 @@ type AtomicEffect
     | PushUrl String
     | LoadUrl String
     | ShareVote RoomName Vote
-    | SharePlayer Player
+    | SharePlayer RoomName Player
     | ShareState GameState
 
 
@@ -49,8 +49,8 @@ performAtomic key effect =
         ShareVote room vote ->
             Vote.sendOut room vote
 
-        SharePlayer toShare ->
-            toShare |> Player.json |> playerOut
+        SharePlayer room player ->
+            Player.sendOut room player
 
         ShareState toShare ->
             toShare |> GameState.json |> statesOut
@@ -83,9 +83,9 @@ toAtomicList acc effects =
                     toAtomicList (list ++ acc) tail
 
 
-sharePlayer : Player -> Effect
-sharePlayer =
-    Atomic << SharePlayer
+sharePlayer : RoomName -> Player -> Effect
+sharePlayer room =
+    Atomic << SharePlayer room
 
 
 shareVote : RoomName -> Vote -> Effect

@@ -86,7 +86,7 @@ simulateAtomicEffects effect =
         ShareVote _ vote ->
             SimulatedEffect.Ports.send Ports.votesOut (Vote.json vote)
 
-        SharePlayer player ->
+        SharePlayer _ player ->
             SimulatedEffect.Ports.send Ports.playerOut (Player.json player)
 
         ShareState state ->

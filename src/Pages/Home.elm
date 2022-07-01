@@ -69,7 +69,7 @@ update shared msg model =
                     [ Effect.pushRoute <| Routes.Room room
                     , case updated of
                         Shared.Ready { player } ->
-                            Effect.sharePlayer player
+                            Effect.sharePlayer room player
 
                         _ ->
                             Effect.none
