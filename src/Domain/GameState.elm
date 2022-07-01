@@ -7,6 +7,7 @@ import Domain.RoomName as RoomName exposing (RoomName)
 
 
 port statesOut : RoomMessage -> Cmd msg
+port statesIn : (Json.Value -> msg) -> Sub msg
 
 
 type GameState

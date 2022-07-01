@@ -2,7 +2,7 @@ module Pages.Room exposing (..)
 
 import AssocList as Dict exposing (Dict)
 import Domain.Card exposing (Card)
-import Domain.GameState exposing (GameState(..))
+import Domain.GameState as GameState exposing (GameState(..))
 import Domain.Nickname exposing (Nickname)
 import Domain.Player as Player
 import Domain.PlayerId exposing (PlayerId)
@@ -59,6 +59,7 @@ type Msg
     = GotSharedMsg Shared.Msg
     | GotPlayer Decode.Value
     | GotVote Decode.Value
+    | GotState Decode.Value
     | Voted Vote
     | Reveal
     | Restart
@@ -129,6 +130,17 @@ update shared msg model =
             case Decode.decodeValue Vote.decoder json of
                 Ok vote ->
                     { model = { model | votes = Dict.update vote.player (\_ -> vote.card) model.votes }
+                    , shared = shared
+                    , effect = Effect.none
+                    }
+
+                Err error ->
+                    Debug.todo <| (++) "log this with a real port, " <| Decode.errorToString error
+
+        GotState json ->
+            case Decode.decodeValue GameState.decoder json of
+                Ok state ->
+                    { model = { model | state = state }
                     , shared = shared
                     , effect = Effect.none
                     }

@@ -106,6 +106,9 @@ simulateSubscriptions _ =
         , SimulatedEffect.Ports.subscribe Ports.votesIn
             Json.Decode.value
             (Main.GotRoomMsg << Pages.Room.GotVote)
+        , SimulatedEffect.Ports.subscribe Ports.statesIn
+            Json.Decode.value
+            (Main.GotRoomMsg << Pages.Room.GotState)
         ]
 
 

@@ -206,6 +206,20 @@ choosingCards =
                                 ]
                             ]
                         |> done
+        , test "Emma revealed the cards" <|
+            withPlayer "emma" <|
+                \emma ->
+                    join { room = "dabest", player = "Pierre" }
+                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
+                        |> simulateIncomingPort Ports.votesIn (Vote.json (Vote.Vote emma.id <| Just <| Card.fromString "TFB"))
+                        |> simulateIncomingPort Ports.statesIn (GameState.json GameState.Chosen)
+                        |> ensureViewHas
+                            [ Selector.all
+                                [ Selector.class "card-slot"
+                                , Selector.containing [ Selector.text "TFB" ]
+                                ]
+                            ]
+                        |> done
         ]
     ]
 
