@@ -11,6 +11,7 @@ import Json.Encode
 import Lib.NonEmptyString as NonEmptyString
 import Main
 import Pages.Room
+import Ports
 import ProgramTest exposing (..)
 import Routes exposing (Route)
 import Shared
@@ -83,13 +84,13 @@ simulateAtomicEffects effect =
             SimulatedEffect.Navigation.load url
 
         ShareVote vote ->
-            SimulatedEffect.Ports.send "votes" (Vote.json vote)
+            SimulatedEffect.Ports.send Ports.votesOut (Vote.json vote)
 
         SharePlayer player ->
-            SimulatedEffect.Ports.send "player" (Player.json player)
+            SimulatedEffect.Ports.send Ports.playerOut (Player.json player)
 
         ShareState state ->
-            SimulatedEffect.Ports.send "states" (GameState.json state)
+            SimulatedEffect.Ports.send Ports.statesOut (GameState.json state)
 
 
 simulateSubscriptions : Main.Model () -> ProgramTest.SimulatedSub Main.Msg
@@ -99,7 +100,7 @@ simulateSubscriptions _ =
         [ SimulatedEffect.Ports.subscribe "playerId"
             Json.Decode.value
             (Main.GotSharedMsg << Shared.GotPlayerId)
-        , SimulatedEffect.Ports.subscribe "playersIn"
+        , SimulatedEffect.Ports.subscribe Ports.playersIn
             Json.Decode.value
             (Main.GotRoomMsg << Pages.Room.GotPlayer)
         ]
