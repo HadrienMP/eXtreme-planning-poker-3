@@ -2,24 +2,23 @@ import { Elm } from "../src/Main.elm";
 import { nanoid } from "nanoid";
 import GUN from "gun/gun";
 
-const log = name => toLog => console.log(name, toLog)
-const parseRoom = () => window.location.pathname.match(/\/room\/(.*)/)[1]
+const padLeft = (size, text) => Array(size - text.length).join(" ") + text
+const log = (name, msg) => console.log(`room: ${msg.room} | ${padLeft(7, name)}:`, msg.data)
 
 const app = Elm.Main.init();
 
 const gun = new GUN().get('xpp3');
 
 app.ports.playerIdPort.send(nanoid(6));
-app.ports.votesOut.subscribe(({ room, data }) => {
-    console.log({ room, vote: data });
-    gun.get(room).get('votes').get(data.player).put(data.card);
+app.ports.votesOut.subscribe(msg => {
+    log("vote", msg);
+    gun.get(msg.room).get('votes').get(msg.data.player).put(msg.data.card);
 });
-app.ports.playerOut.subscribe(({room, data}) => {
-    console.log({ room, player: data });
-    gun.get(parseRoom()).get('players').get(data.id).put(data.nickname);
+app.ports.playerOut.subscribe(msg => {
+    log("player", msg);
+    gun.get(msg.room).get('players').get(msg.data.id).put(msg.data.nickname);
 });
-app.ports.statesOut.subscribe(state => {
-    log("state")(state);
-    log("room")(parseRoom());
-    gun.get(parseRoom()).get('state').put(state);
+app.ports.statesOut.subscribe(msg => {
+    log("state", msg);
+    gun.get(msg.room).get('state').put(msg.data);
 });

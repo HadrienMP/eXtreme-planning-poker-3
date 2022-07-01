@@ -104,13 +104,13 @@ update shared msg model =
         Reveal ->
             { model = { model | state = Chosen }
             , shared = shared
-            , effect = Effect.shareState Chosen
+            , effect = Effect.shareState model.room Chosen
             }
 
         Restart ->
             { model = { model | state = Choosing, votes = Dict.empty }
             , shared = shared
-            , effect = Effect.shareState Choosing
+            , effect = Effect.shareState model.room Choosing
             }
 
         GotPlayer json ->

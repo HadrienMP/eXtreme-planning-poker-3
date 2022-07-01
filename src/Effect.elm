@@ -14,7 +14,7 @@ type AtomicEffect
     | LoadUrl String
     | ShareVote RoomName Vote
     | SharePlayer RoomName Player
-    | ShareState GameState
+    | ShareState RoomName GameState
 
 
 type Effect
@@ -52,8 +52,8 @@ performAtomic key effect =
         SharePlayer room player ->
             Player.sendOut room player
 
-        ShareState toShare ->
-            toShare |> GameState.json |> statesOut
+        ShareState room state ->
+            GameState.sendOut room state
 
 
 none : Effect
@@ -93,9 +93,9 @@ shareVote room =
     Atomic << ShareVote room
 
 
-shareState : GameState -> Effect
-shareState =
-    Atomic << ShareState
+shareState : RoomName -> GameState -> Effect
+shareState room =
+    Atomic << ShareState room
 
 
 

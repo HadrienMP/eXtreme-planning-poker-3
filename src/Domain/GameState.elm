@@ -2,14 +2,21 @@ port module Domain.GameState exposing (..)
 
 import Json.Decode as Decode
 import Json.Encode as Json
+import Domain.RoomMessage exposing (RoomMessage)
+import Domain.RoomName as RoomName exposing (RoomName)
 
 
-port statesOut : Json.Value -> Cmd msg
+port statesOut : RoomMessage -> Cmd msg
 
 
 type GameState
     = Choosing
     | Chosen
+
+
+sendOut : RoomName -> GameState -> Cmd msg
+sendOut room =
+    json >> RoomMessage (RoomName.print room) >> statesOut
 
 
 json : GameState -> Json.Value

@@ -89,7 +89,7 @@ simulateAtomicEffects effect =
         SharePlayer _ player ->
             SimulatedEffect.Ports.send Ports.playerOut (Player.json player)
 
-        ShareState state ->
+        ShareState _ state ->
             SimulatedEffect.Ports.send Ports.statesOut (GameState.json state)
 
 
