@@ -10,6 +10,7 @@ import Domain.Vote as Vote
 import Effect exposing (Effect)
 import Expect
 import Main
+import Ports exposing (ensurePlayerOut, ensureStatesOut, ensureVotesOut)
 import ProgramTest exposing (..)
 import Routes
 import Test exposing (..)
@@ -40,10 +41,7 @@ setup =
                     |> writeInField { id = "nickname", label = "Nickname", value = Nickname.print nickname }
                     |> clickButton "Join"
                     |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text <| Nickname.print nickname ] ] ]
-                    |> ensureOutgoingPortValues
-                        "player"
-                        Player.decoder
-                        (Expect.equal [ Player.Player id nickname ])
+                    |> ensurePlayerOut (Player.Player id nickname)
                     |> done
     , test "share the player's identity when they initialize the room also" <|
         withMaybe2 ( PlayerId.create "emma-id", Nickname.create "Emma" ) <|
@@ -83,10 +81,7 @@ cardsRevealed =
                         , Selector.containing [ Selector.all [ Selector.text "TFB", Selector.text "Jojo" ] ]
                         ]
                     ]
-                |> ensureOutgoingPortValues
-                    "states"
-                    GameState.decoder
-                    (Expect.equal [ GameState.Chosen, GameState.Choosing ])
+                |> ensureStatesOut [ GameState.Chosen, GameState.Choosing ]
                 |> done
     , test "clicking on restart reveals the deck" <|
         \_ ->
@@ -116,10 +111,7 @@ choosingCards =
                                 , Selector.containing [ Selector.text "TFB" ]
                                 ]
                             ]
-                        |> ensureOutgoingPortValues
-                            "votes"
-                            Vote.decoder
-                            (Expect.equal [ Vote.Vote playerId (Just <| Card.fromString "TFB") ])
+                        |> ensureVotesOut [ Vote.Vote playerId (Just <| Card.fromString "TFB") ]
                         |> done
         , test "creating the room - click a card on your deck to choose a card" <|
             withMaybe (PlayerId.create "playerId-joba") <|
@@ -133,10 +125,7 @@ choosingCards =
                                 , Selector.containing [ Selector.text "TFB" ]
                                 ]
                             ]
-                        |> ensureOutgoingPortValues
-                            "votes"
-                            Vote.decoder
-                            (Expect.equal [ Vote.Vote playerId (Just <| Card.fromString "TFB") ])
+                        |> ensureVotesOut [ Vote.Vote playerId (Just <| Card.fromString "TFB") ]
                         |> done
         , test "before revealing cards are hidden" <|
             \_ ->
@@ -162,14 +151,10 @@ choosingCards =
                                 , Selector.containing [ Selector.text "TFB" ]
                                 ]
                             ]
-                        |> ensureOutgoingPortValues
-                            "votes"
-                            Vote.decoder
-                            (Expect.equal
-                                [ Vote.Vote playerId (Just <| Card.fromString "TFB")
-                                , Vote.Vote playerId Nothing
-                                ]
-                            )
+                        |> ensureVotesOut
+                            [ Vote.Vote playerId (Just <| Card.fromString "TFB")
+                            , Vote.Vote playerId Nothing
+                            ]
                         |> done
         , test "clicking a card then another changes the vote" <|
             \_ ->
@@ -195,10 +180,7 @@ choosingCards =
                             , Selector.containing [ Selector.text "TFB" ]
                             ]
                         ]
-                    |> ensureOutgoingPortValues
-                        "states"
-                        GameState.decoder
-                        (Expect.equal [ GameState.Chosen ])
+                    |> ensureStatesOut [ GameState.Chosen ]
                     |> done
         ]
     , describe "peer actions"
