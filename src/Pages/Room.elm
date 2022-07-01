@@ -7,7 +7,7 @@ import Domain.Nickname exposing (Nickname)
 import Domain.Player as Player
 import Domain.PlayerId exposing (PlayerId)
 import Domain.RoomName exposing (RoomName)
-import Domain.Vote exposing (Vote)
+import Domain.Vote as Vote exposing (Vote)
 import Effect
 import Element exposing (..)
 import Element.Border as Border
@@ -58,6 +58,7 @@ init shared room =
 type Msg
     = GotSharedMsg Shared.Msg
     | GotPlayer Decode.Value
+    | GotVote Decode.Value
     | Voted Vote
     | Reveal
     | Restart
@@ -121,8 +122,26 @@ update shared msg model =
                     , effect = Effect.none
                     }
 
-                Err _ ->
-                    Debug.todo "log this with a real port"
+                Err error ->
+                    Debug.todo <| (++) "log this with a real port, " <| Decode.errorToString error
+
+        GotVote json ->
+            case Decode.decodeValue Vote.decoder json of
+                Ok vote ->
+                    { model = { model | votes = Dict.update vote.player (\_ -> vote.card) model.votes }
+                    , shared = shared
+                    , effect = Effect.none
+                    }
+
+                Err error ->
+                    Debug.todo <| (++) "log this with a real port, " <| Decode.errorToString error
+
+
+addPlayer : Shared.Model -> Dict PlayerId Nickname -> Dict PlayerId Nickname
+addPlayer shared players =
+    Shared.getPlayer shared
+        |> Maybe.map (\player -> Dict.insert player.id player.nickname players)
+        |> Maybe.withDefault players
 
 
 
@@ -133,14 +152,7 @@ update shared msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Player.playersIn GotPlayer
-
-
-addPlayer : Shared.Model -> Dict PlayerId Nickname -> Dict PlayerId Nickname
-addPlayer shared players =
-    Shared.getPlayer shared
-        |> Maybe.map (\player -> Dict.insert player.id player.nickname players)
-        |> Maybe.withDefault players
+    Sub.batch [ Player.playersIn GotPlayer, Vote.votesIn GotVote ]
 
 
 

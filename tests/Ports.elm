@@ -38,6 +38,11 @@ ensureVotesOut votes =
         (Expect.equal votes)
 
 
+votesIn : String
+votesIn =
+    "votesIn"
+
+
 statesOut : String
 statesOut =
     "statesOut"

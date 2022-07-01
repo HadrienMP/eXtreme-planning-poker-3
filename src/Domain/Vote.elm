@@ -9,6 +9,7 @@ import Domain.RoomMessage exposing (RoomMessage)
 
 
 port votesOut : RoomMessage -> Cmd msg
+port votesIn : (Json.Value -> msg) -> Sub msg
 
 
 type alias Vote =

@@ -184,11 +184,25 @@ choosingCards =
             withPlayer "emma" <|
                 \emma ->
                     join { room = "dabest", player = "Pierre" }
-                        |> simulateIncomingPort "playersIn" (Player.json emma)
+                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
                         |> ensureViewHas
                             [ Selector.all
                                 [ Selector.class "card-slot"
                                 , Selector.containing [ Selector.text <| Nickname.print <| emma.nickname ]
+                                ]
+                            ]
+                        |> done
+        , test "Emma voted" <|
+            withPlayer "emma" <|
+                \emma ->
+                    join { room = "dabest", player = "Pierre" }
+                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
+                        |> simulateIncomingPort Ports.votesIn (Vote.json (Vote.Vote emma.id <| Just <| Card.fromString "TFB"))
+                        |> clickButton "Reveal"
+                        |> ensureViewHas
+                            [ Selector.all
+                                [ Selector.class "card-slot"
+                                , Selector.containing [ Selector.text "TFB" ]
                                 ]
                             ]
                         |> done
