@@ -46,7 +46,7 @@ text_ { onChange, value, label, size } =
          , Font.color Theme.Colors.text
          , Border.width 0
          , Border.rounded 0
-         , padding 0
+         , paddingXY 0 2
          , width fill
          ]
             ++ (size |> Maybe.map (\a -> [ htmlAttribute <| Html.Attributes.size a ]) |> Maybe.withDefault [])
