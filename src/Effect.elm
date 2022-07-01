@@ -3,9 +3,9 @@ module Effect exposing (..)
 import Browser.Navigation
 import Domain.GameState as GameState exposing (GameState, statesOut)
 import Domain.Player as Player exposing (Player, playerOut)
-import Domain.Vote as Vote exposing (Vote, votesOut)
+import Domain.RoomName exposing (RoomName)
+import Domain.Vote as Vote exposing (Vote)
 import Routes exposing (Route)
-import Domain.RoomName as RoomName exposing (RoomName)
 
 
 type AtomicEffect

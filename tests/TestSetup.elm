@@ -20,7 +20,6 @@ import SimulatedEffect.Navigation
 import SimulatedEffect.Ports
 import SimulatedEffect.Sub
 import Test.Html.Selector as Selector
-import Domain.RoomName exposing (RoomName)
 
 
 baseUrl : String
@@ -84,7 +83,7 @@ simulateAtomicEffects effect =
         LoadUrl url ->
             SimulatedEffect.Navigation.load url
 
-        ShareVote roomName vote ->
+        ShareVote _ vote ->
             SimulatedEffect.Ports.send Ports.votesOut (Vote.json vote)
 
         SharePlayer player ->
