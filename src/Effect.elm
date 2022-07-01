@@ -1,7 +1,7 @@
 module Effect exposing (..)
 
 import Browser.Navigation
-import Domain.GameState as GameState exposing (GameState, statesOut)
+import Domain.GameState as GameState exposing (GameState)
 import Domain.Player as Player exposing (Player)
 import Domain.RoomName exposing (RoomName)
 import Domain.Vote as Vote exposing (Vote)
