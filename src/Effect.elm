@@ -5,13 +5,14 @@ import Domain.GameState as GameState exposing (GameState, statesOut)
 import Domain.Player as Player exposing (Player, playerOut)
 import Domain.Vote as Vote exposing (Vote, votesOut)
 import Routes exposing (Route)
+import Domain.RoomName as RoomName exposing (RoomName)
 
 
 type AtomicEffect
     = None
     | PushUrl String
     | LoadUrl String
-    | ShareVote Vote
+    | ShareVote RoomName Vote
     | SharePlayer Player
     | ShareState GameState
 
@@ -45,8 +46,8 @@ performAtomic key effect =
         LoadUrl url ->
             Browser.Navigation.load url
 
-        ShareVote vote ->
-            vote |> Vote.json |> votesOut
+        ShareVote room vote ->
+            Vote.sendOut room vote
 
         SharePlayer toShare ->
             toShare |> Player.json |> playerOut
@@ -87,9 +88,9 @@ sharePlayer =
     Atomic << SharePlayer
 
 
-shareVote : Vote -> Effect
-shareVote =
-    Atomic << ShareVote
+shareVote : RoomName -> Vote -> Effect
+shareVote room =
+    Atomic << ShareVote room
 
 
 shareState : GameState -> Effect

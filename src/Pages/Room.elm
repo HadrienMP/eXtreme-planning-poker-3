@@ -98,7 +98,7 @@ update shared msg model =
                     _ ->
                         model
             , shared = shared
-            , effect = Effect.shareVote vote
+            , effect = Effect.shareVote model.room vote
             }
 
         Reveal ->
