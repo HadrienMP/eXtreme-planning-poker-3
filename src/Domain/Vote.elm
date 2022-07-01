@@ -1,9 +1,12 @@
-module Domain.Vote exposing (..)
+port module Domain.Vote exposing (..)
 
 import Domain.Card as Card exposing (Card)
 import Domain.PlayerId as PlayerId exposing (PlayerId)
 import Json.Decode as Decode
 import Json.Encode as Json
+
+
+port votesOut : Json.Value -> Cmd msg
 
 
 type alias Vote =

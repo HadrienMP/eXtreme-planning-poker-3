@@ -8,7 +8,6 @@ import Domain.PlayerId as PlayerId exposing (PlayerId)
 import Domain.RoomName as Room
 import Domain.Vote as Vote
 import Effect exposing (Effect)
-import Expect
 import Main
 import Ports exposing (ensurePlayerOut, ensureStatesOut, ensureVotesOut)
 import ProgramTest exposing (..)
@@ -47,10 +46,7 @@ setup =
         withMaybe2 ( PlayerId.create "emma-id", Nickname.create "Emma" ) <|
             \( id, nickname ) ->
                 joinWithPlayerId { room = "dabest", player = { nickname = Nickname.print nickname, id = id } }
-                    |> ensureOutgoingPortValues
-                        "player"
-                        Player.decoder
-                        (Expect.equal [ Player.Player id nickname ])
+                    |> ensurePlayerOut (Player.Player id nickname)
                     |> done
     , test "display a loader when the player id is not defined" <|
         inRoom "dabest" <|

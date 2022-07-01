@@ -1,20 +1,10 @@
-port module Effect exposing (..)
+module Effect exposing (..)
 
 import Browser.Navigation
-import Domain.GameState as GameState exposing (GameState)
-import Domain.Player as Player exposing (Player)
-import Domain.Vote as Vote exposing (Vote)
-import Json.Encode as Json
+import Domain.GameState as GameState exposing (GameState, statesOut)
+import Domain.Player as Player exposing (Player, playerOut)
+import Domain.Vote as Vote exposing (Vote, votesOut)
 import Routes exposing (Route)
-
-
-port votes : Json.Value -> Cmd msg
-
-
-port player : Json.Value -> Cmd msg
-
-
-port states : Json.Value -> Cmd msg
 
 
 type AtomicEffect
@@ -56,13 +46,13 @@ performAtomic key effect =
             Browser.Navigation.load url
 
         ShareVote vote ->
-            vote |> Vote.json |> votes
+            vote |> Vote.json |> votesOut
 
         SharePlayer toShare ->
-            toShare |> Player.json |> player
+            toShare |> Player.json |> playerOut
 
         ShareState toShare ->
-            toShare |> GameState.json |> states
+            toShare |> GameState.json |> statesOut
 
 
 none : Effect

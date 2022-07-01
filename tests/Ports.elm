@@ -9,7 +9,7 @@ import ProgramTest exposing (..)
 
 playerOut : String
 playerOut =
-    "player"
+    "playerOut"
 
 
 ensurePlayerOut : Player -> ProgramTest model msg effect -> ProgramTest model msg effect
@@ -27,7 +27,7 @@ playersIn =
 
 votesOut : String
 votesOut =
-    "votes"
+    "votesOut"
 
 
 ensureVotesOut : List Vote -> ProgramTest model msg effect -> ProgramTest model msg effect
@@ -40,7 +40,7 @@ ensureVotesOut votes =
 
 statesOut : String
 statesOut =
-    "states"
+    "statesOut"
 
 
 ensureStatesOut : List GameState -> ProgramTest model msg effect -> ProgramTest model msg effect

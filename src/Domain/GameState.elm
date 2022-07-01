@@ -1,7 +1,10 @@
-module Domain.GameState exposing (..)
+port module Domain.GameState exposing (..)
 
 import Json.Decode as Decode
 import Json.Encode as Json
+
+
+port statesOut : Json.Value -> Cmd msg
 
 
 type GameState

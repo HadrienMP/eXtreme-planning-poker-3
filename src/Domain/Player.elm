@@ -1,9 +1,12 @@
-port module Domain.Player exposing (Player, decoder, json, playersIn)
+port module Domain.Player exposing (Player, decoder, json, playerOut, playersIn)
 
 import Domain.Nickname as Nickname exposing (Nickname)
 import Domain.PlayerId as PlayerId exposing (PlayerId)
 import Json.Decode as Decode
 import Json.Encode as Json
+
+
+port playerOut : Json.Value -> Cmd msg
 
 
 port playersIn : (Json.Value -> msg) -> Sub msg
@@ -16,10 +19,10 @@ type alias Player =
 
 
 json : Player -> Json.Value
-json player =
+json it =
     Json.object
-        [ ( "id", PlayerId.json player.id )
-        , ( "nickname", Nickname.json player.nickname )
+        [ ( "id", PlayerId.json it.id )
+        , ( "nickname", Nickname.json it.nickname )
         ]
 
 
