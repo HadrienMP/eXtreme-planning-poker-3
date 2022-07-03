@@ -164,7 +164,7 @@ addPlayer shared players =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.batch [ Player.playersIn GotPlayer, Vote.votesIn GotVote ]
+    Sub.batch [ Player.playersIn GotPlayer, Vote.votesIn GotVote, GameState.statesIn GotState ]
 
 
 
