@@ -23,7 +23,6 @@ export const connect = (onConnection = noop) => {
     // Message
     // -----------------------
     socket.on('message', (msg) => {
-        console.debug('<=== message', JSON.stringify(msg));
         msgCbck(msg);
     })
 
@@ -31,15 +30,12 @@ export const connect = (onConnection = noop) => {
     // Peer
     // -----------------------
     socket.on('peer', msg => {
-        console.debug('<=== peer', JSON.stringify(msg));
         switch (msg.type) {
             case "joined":
-                console.log('<=== joined:', msg.peer);
                 joinedCbck(msg.peer);
                 break;
             case "disconnecting":
-                console.log('<=== disconnecting', JSON.stringify(msg));
-                leftCbck(msg.peer);
+                leftCbck(msg);
                 break;
             default:
                 console.error('unknown peer event: ' + JSON.stringify(msg))
@@ -48,4 +44,5 @@ export const connect = (onConnection = noop) => {
     })
 };
 
-export const send = (room, data) => socket.emit('message', {room, data});
+export const joinRoom = (room) => socket.emit('join', { data: room });
+export const send = (room, data) => socket.emit('message', { room, data });
