@@ -2,15 +2,14 @@ export const playerMsgType = 'Player';
 export const voteplayerMsgType = 'Vote';
 export const stateMsgType = 'State';
 export const historyMsgType = 'History';
+export const playerLeftMsgType = 'PlayerLeft';
 
 export const join = (currentRoom, tokiNanpa, listeners = { onPlayer, onVote, onState, onPlayerLeft }) => {
     const history = [];
 
     tokiNanpa.joinRoom(currentRoom);
 
-    tokiNanpa.onPeerLeft(({ room, peer }) => {
-        return room === currentRoom ? listeners.onPlayerLeft(peer) : null;
-    });
+    tokiNanpa.onPeerLeft(({ room, peer }) => handleSingleMessage({room, data: {type: playerLeftMsgType, id: peer}}));
     tokiNanpa.onPeerJoined((peer) => peer !== tokiNanpa.me ? tokiNanpa.send(currentRoom, { type: historyMsgType, history }) : null);
     tokiNanpa.onMessage((msg) => {
         if (msg.data.type === historyMsgType && history !== []) {
@@ -33,6 +32,9 @@ export const join = (currentRoom, tokiNanpa, listeners = { onPlayer, onVote, onS
             case stateMsgType:
                 listeners.onState(data);
                 break;
+            case playerLeftMsgType:
+                listeners.onPlayerLeft(data.id);
+                break;            
             default:
                 console.error('unknown message: ' + JSON.stringify(msg));
                 break;
