@@ -1,63 +1,110 @@
-import GUN from "gun/gun";
-require("gun/lib/path");
-import { nanoid } from "nanoid";
+import { io } from 'socket.io-client';
 import { Elm } from "../src/Main.elm";
 
 
 const app = Elm.Main.init();
 
-const gun = new GUN("https://hmp-gundb-server.onrender.com/gun");
+const socket = io("https://toki-nanpa.onrender.com");
 
-const playerId = nanoid(6)
-app.ports.playerIdPort.send(playerId);
+let playerId = null;
+socket.on('connect', () => {
+    playerId = socket.id;
+    app.ports.playerIdPort.send(playerId);
+
+})
+
 app.ports.playerOut.subscribe(msg => {
     const room = msg.room;
+    const history = []
+    socket.on('message', (msg) => {
+        console.debug('<=== message', JSON.stringify(msg));
+        if (msg.data?.type === 'History' && history !== []) {
+            console.log('<=== history', {history: msg.data.history});
+            history.concat(msg.data.history);
+            msg.data.history.forEach(it => {
+                handleSingleMessage(it);
+            });
+        } else {
+            handleSingleMessage(msg);
+        }
+    });
+
+    const handleSingleMessage = (msg) => {
+        try {
+            const { room, peer, data } = msg;
+            history.push(msg);
+            switch (data.type) {
+                case "Player":
+                    handlePlayerMsg(data);
+                    break;
+                case "Vote":
+                    handleVoteMsg(data);
+                    break;
+                case "State":
+                    handleStateMsg(data);
+                    break;
+                default:
+                    console.error('unknown message: ' + JSON.stringify(msg));
+                    break;
+            }
+        } catch (e) {
+            console.error('dafuck: ' + JSON.stringify(msg));
+        }
+    }
+
+    socket.on('peer', msg => {
+        switch (msg.type) {
+            case "joined":
+                console.log('<=== joined:', msg.peer);
+                if (msg.peer !== socket.id) {
+                    console.log(`===> History`);
+                    socket.emit('message', { room, data: { type: 'History', history } })
+                }
+                break;
+            case "disconnecting":
+                console.log('disconnecting', JSON.stringify(msg));
+                app.ports.playerLeft.send(msg.peer);
+                break;
+            default:
+                console.error('unknown peer event: ' + JSON.stringify(msg))
+                break;
+        }
+    })
 
     // --------------------------
     // Players
     // --------------------------
-    const gunPlayers = gun.path(`xpp3/${room}/players`);
-    gunPlayers.map().on((nickname, id) => {
+    const handlePlayerMsg = data => {
+        const { id, nickname } = data;
         console.log(`<=== player: ${id}/${nickname}`)
-        if (nickname === null) app.ports.playerLeft.send(id);
-        else app.ports.playersIn.send({ id, nickname });
-    });
+        app.ports.playersIn.send({ id, nickname });
+    }
+
 
     console.log(`===> player: ${playerId}/${msg.data.nickname}`)
-    gunPlayers.get(playerId).put(msg.data.nickname);
+    socket.emit('message', { room, data: { type: "Player", id: playerId, nickname: msg.data.nickname } });
 
     // --------------------------
     // Votes
     // --------------------------
-    const gunVotes = gun.path(`xpp3/${room}/votes`);
-    gunVotes.map().on((card, player) => {
-        // console.log(`<=== vote: ${player}/${card}`)
-        return app.ports.votesIn.send({ player, card });
-    });
+    const handleVoteMsg = data => {
+        const { id, card } = data;
+        app.ports.votesIn.send({ player: id, card });
+    }
     app.ports.votesOut.subscribe(msg => {
-        // console.log(`===> vote: ${msg.data}`)
-        return gunVotes.get(playerId).put(msg.data.card);
+        socket.emit('message', { room, data: { type: "Vote", id: playerId, card: msg.data.card } });
     });
 
     // --------------------------
     // State
     // --------------------------
-    const gunRoom = gun.path(`xpp3/${room}`);
-    gunRoom.on((roomObj, k) => {
-        console.log(`<=== state: ${roomObj.state}`)
-        return app.ports.statesIn.send(roomObj.state);
-    });
+    const handleStateMsg = data => {
+        const { state } = data;
+        console.log(`<=== state: ${state}`)
+        app.ports.statesIn.send(state);
+    }
     app.ports.statesOut.subscribe(msg => {
         console.log(`===> state: ${msg.data}`)
-        return gunRoom.put({ state: msg.data });
+        socket.emit('message', { room, data: { type: "State", state: msg.data } });
     });
-
-
-    // --------------------------
-    // Leaving
-    // --------------------------
-    window.onbeforeunload = () => {
-        gunPlayers.get(playerId).put(null);
-        gunVotes.get(playerId).put(null);
-    };
 });
