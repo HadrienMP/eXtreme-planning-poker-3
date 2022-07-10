@@ -220,6 +220,19 @@ choosingCards =
                                 ]
                             ]
                         |> done
+        , test "Emma left" <|
+            withPlayer "emma" <|
+                \emma ->
+                    join { room = "dabest", player = "Pierre" }
+                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
+                        |> simulateIncomingPort Ports.playerLeft (PlayerId.json emma.id)
+                        |> ensureViewHasNot
+                            [ Selector.all
+                                [ Selector.class "card-slot"
+                                , Selector.containing [ Selector.text <| Nickname.print emma.nickname ]
+                                ]
+                            ]
+                        |> done
         ]
     ]
 

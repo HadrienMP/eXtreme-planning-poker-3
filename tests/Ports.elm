@@ -25,6 +25,11 @@ playersIn =
     "playersIn"
 
 
+playerLeft : String
+playerLeft =
+    "playerLeft"
+
+
 votesOut : String
 votesOut =
     "votesOut"

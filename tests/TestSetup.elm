@@ -95,7 +95,6 @@ simulateAtomicEffects effect =
 
 simulateSubscriptions : Main.Model () -> ProgramTest.SimulatedSub Main.Msg
 simulateSubscriptions _ =
-    -- TODO HMP extract a portsList
     SimulatedEffect.Sub.batch
         [ SimulatedEffect.Ports.subscribe "playerId"
             Json.Decode.value
@@ -109,6 +108,9 @@ simulateSubscriptions _ =
         , SimulatedEffect.Ports.subscribe Ports.statesIn
             Json.Decode.value
             (Main.GotRoomMsg << Pages.Room.GotState)
+        , SimulatedEffect.Ports.subscribe Ports.playerLeft
+            Json.Decode.value
+            (Main.GotRoomMsg << Pages.Room.PlayerLeft)
         ]
 
 

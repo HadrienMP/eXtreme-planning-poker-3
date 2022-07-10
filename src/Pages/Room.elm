@@ -5,7 +5,7 @@ import Domain.Card exposing (Card)
 import Domain.GameState as GameState exposing (GameState(..))
 import Domain.Nickname exposing (Nickname)
 import Domain.Player as Player
-import Domain.PlayerId exposing (PlayerId)
+import Domain.PlayerId as PlayerId exposing (PlayerId)
 import Domain.RoomName exposing (RoomName)
 import Domain.Vote as Vote exposing (Vote)
 import Effect
@@ -60,6 +60,7 @@ type Msg
     | GotPlayer Decode.Value
     | GotVote Decode.Value
     | GotState Decode.Value
+    | PlayerLeft Decode.Value
     | Voted Vote
     | Reveal
     | Restart
@@ -148,6 +149,17 @@ update shared msg model =
                 Err error ->
                     Debug.todo <| (++) "log this with a real port, " <| Decode.errorToString error
 
+        PlayerLeft json ->
+            case Decode.decodeValue PlayerId.decoder json of
+                Ok playerId ->
+                    { model = { model | players = Dict.remove playerId model.players }
+                    , shared = shared
+                    , effect = Effect.none
+                    }
+
+                Err error ->
+                    Debug.todo <| (++) "log this with a real port, " <| Decode.errorToString error
+
 
 addPlayer : Shared.Model -> Dict PlayerId Nickname -> Dict PlayerId Nickname
 addPlayer shared players =
@@ -164,7 +176,12 @@ addPlayer shared players =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Sub.batch [ Player.playersIn GotPlayer, Vote.votesIn GotVote, GameState.statesIn GotState ]
+    Sub.batch
+        [ Player.playersIn GotPlayer
+        , Vote.votesIn GotVote
+        , GameState.statesIn GotState
+        , Player.playerLeft PlayerLeft
+        ]
 
 
 

@@ -1,4 +1,4 @@
-port module Domain.Player exposing (Player, decoder, json, playersIn, sendOut)
+port module Domain.Player exposing (Player, decoder, json, playersIn, sendOut, playerLeft)
 
 import Domain.Nickname as Nickname exposing (Nickname)
 import Domain.PlayerId as PlayerId exposing (PlayerId)
@@ -12,6 +12,9 @@ port playerOut : RoomMessage -> Cmd msg
 
 
 port playersIn : (Json.Value -> msg) -> Sub msg
+
+
+port playerLeft : (Json.Value -> msg) -> Sub msg
 
 
 type alias Player =
