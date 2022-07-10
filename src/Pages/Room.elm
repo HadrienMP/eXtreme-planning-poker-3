@@ -19,7 +19,7 @@ import Html.Attributes
 import Json.Decode as Decode
 import Lib.UpdateResult exposing (UpdateResult)
 import Shared
-import Theme.Attributes
+import Theme.Attributes exposing (..)
 import Theme.Card
 import Theme.Colors exposing (white)
 import Theme.Input
@@ -141,7 +141,16 @@ update shared msg model =
         GotState json ->
             case Decode.decodeValue GameState.decoder json of
                 Ok state ->
-                    { model = { model | state = state }
+                    { model =
+                        { model
+                            | state = state
+                            , votes =
+                                if state /= model.state && state == Choosing then
+                                    Dict.empty
+
+                                else
+                                    model.votes
+                        }
                     , shared = shared
                     , effect = Effect.none
                     }
@@ -294,7 +303,7 @@ displayDeckCards selected shared =
 displayCard : Maybe Card -> Shared.Complete -> Card -> Element Msg
 displayCard selected shared card =
     if Just card == selected then
-        Input.button [ moveUp 8 ]
+        Input.button [ moveUp 8, class "selected" ]
             { onPress = Vote shared.player.id Maybe.Nothing |> Voted |> Just
             , label = Theme.Card.front { label = Domain.Card.print card }
             }

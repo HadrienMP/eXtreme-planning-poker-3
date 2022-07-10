@@ -1,9 +1,10 @@
-module Theme.Card exposing (back, front, slot, action)
+module Theme.Card exposing (action, back, front, slot)
 
 import Element exposing (..)
 import Element.Background
 import Element.Border
 import Element.Font
+import Theme.Attributes exposing (class)
 import Theme.Colors exposing (..)
 import Theme.Theme exposing (noTextShadow)
 
@@ -17,6 +18,7 @@ back =
         , Element.Border.rounded 8
         , Theme.Theme.boxShadow
         , padding 4
+        , class "card-back"
         ]
     <|
         el

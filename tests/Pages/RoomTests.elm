@@ -100,6 +100,7 @@ choosingCards =
                         |> writeInField { id = "nickname", label = "Nickname", value = "Joba" }
                         |> clickButton "Join"
                         |> clickButton "TFB"
+                        |> ensureCardIsSelected "TFB"
                         |> clickButton "Reveal"
                         |> ensureViewHas
                             [ Selector.all
@@ -114,6 +115,7 @@ choosingCards =
                 \playerId ->
                     joinWithPlayerId { room = "dabest", player = { nickname = "Joba", id = playerId } }
                         |> clickButton "TFB"
+                        |> ensureCardIsSelected "TFB"
                         |> clickButton "Reveal"
                         |> ensureViewHas
                             [ Selector.all
@@ -220,6 +222,17 @@ choosingCards =
                                 ]
                             ]
                         |> done
+        , test "Emma restarted the game, the votes are reset" <|
+            withPlayer "emma" <|
+                \emma ->
+                    join { room = "dabest", player = "Pierre" }
+                        |> clickButton "1"
+                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
+                        |> simulateIncomingPort Ports.votesIn (Vote.json (Vote.Vote emma.id <| Just <| Card.fromString "TFB"))
+                        |> simulateIncomingPort Ports.statesIn (GameState.json GameState.Chosen)
+                        |> simulateIncomingPort Ports.statesIn (GameState.json GameState.Choosing)
+                        |> ensureNoCardIsSelected
+                        |> done
         , test "Emma left" <|
             withPlayer "emma" <|
                 \emma ->
@@ -235,6 +248,31 @@ choosingCards =
                         |> done
         ]
     ]
+
+
+ensureCardIsSelected : String -> ProgramTest (Main.Model ()) Main.Msg Effect -> ProgramTest (Main.Model ()) Main.Msg Effect
+ensureCardIsSelected card =
+    ensureViewHas
+        [ Selector.class "card-back"
+        , Selector.all
+            [ Selector.id "my-deck"
+            , Selector.containing
+                [ Selector.class "selected"
+                , Selector.containing [ Selector.text card ]
+                ]
+            ]
+        ]
+
+
+ensureNoCardIsSelected : ProgramTest (Main.Model ()) Main.Msg Effect -> ProgramTest (Main.Model ()) Main.Msg Effect
+ensureNoCardIsSelected =
+    ensureViewHasNot [ Selector.class "card-back" ]
+        >> ensureViewHasNot
+            [ Selector.all
+                [ Selector.id "my-deck"
+                , Selector.containing [ Selector.class "selected" ]
+                ]
+            ]
 
 
 initialDisplay : List Test
