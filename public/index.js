@@ -1,29 +1,26 @@
-import { io } from 'socket.io-client';
 import { Elm } from "../src/Main.elm";
-
+import * as tokiNanpa from './toki-nanpa-client';
 
 const app = Elm.Main.init();
 
-const socket = io("https://toki-nanpa.onrender.com");
+tokiNanpa.connect(app.ports.playerIdPort.send);
 
-let playerId = null;
-socket.on('connect', () => {
-    playerId = socket.id;
-    app.ports.playerIdPort.send(playerId);
-
-})
-
-app.ports.playerOut.subscribe(msg => {
-    const room = msg.room;
+app.ports.playerOut.subscribe(playerOutMsg => {
+    const room = playerOutMsg.room;
     const history = []
-    socket.on('message', (msg) => {
-        console.debug('<=== message', JSON.stringify(msg));
-        if (msg.data?.type === 'History' && history !== []) {
-            console.log('<=== history', {history: msg.data.history});
-            history.concat(msg.data.history);
-            msg.data.history.forEach(it => {
-                handleSingleMessage(it);
-            });
+
+    tokiNanpa.onPeerJoined((peer) => {
+        if (peer !== tokiNanpa.me) {
+            console.log(`===> History`);
+            tokiNanpa.send(room, { type: 'History', history })
+        }
+    });
+    tokiNanpa.onPeerLeft(app.ports.playerLeft.send);
+
+    tokiNanpa.onMessage((msg) => {
+        if (msg.data.type === 'History' && history !== []) {
+            console.log('<=== history', { history: msg.data.history });
+            msg.data.history.forEach(handleSingleMessage);
         } else {
             handleSingleMessage(msg);
         }
@@ -31,8 +28,8 @@ app.ports.playerOut.subscribe(msg => {
 
     const handleSingleMessage = (msg) => {
         try {
-            const { room, peer, data } = msg;
             history.push(msg);
+            const { data } = msg;
             switch (data.type) {
                 case "Player":
                     handlePlayerMsg(data);
@@ -52,25 +49,6 @@ app.ports.playerOut.subscribe(msg => {
         }
     }
 
-    socket.on('peer', msg => {
-        switch (msg.type) {
-            case "joined":
-                console.log('<=== joined:', msg.peer);
-                if (msg.peer !== socket.id) {
-                    console.log(`===> History`);
-                    socket.emit('message', { room, data: { type: 'History', history } })
-                }
-                break;
-            case "disconnecting":
-                console.log('disconnecting', JSON.stringify(msg));
-                app.ports.playerLeft.send(msg.peer);
-                break;
-            default:
-                console.error('unknown peer event: ' + JSON.stringify(msg))
-                break;
-        }
-    })
-
     // --------------------------
     // Players
     // --------------------------
@@ -81,8 +59,8 @@ app.ports.playerOut.subscribe(msg => {
     }
 
 
-    console.log(`===> player: ${playerId}/${msg.data.nickname}`)
-    socket.emit('message', { room, data: { type: "Player", id: playerId, nickname: msg.data.nickname } });
+    console.log(`===> player: ${tokiNanpa.me}/${playerOutMsg.data.nickname}`)
+    tokiNanpa.send(room, { type: "Player", id: tokiNanpa.me, nickname: playerOutMsg.data.nickname });
 
     // --------------------------
     // Votes
@@ -92,7 +70,7 @@ app.ports.playerOut.subscribe(msg => {
         app.ports.votesIn.send({ player: id, card });
     }
     app.ports.votesOut.subscribe(msg => {
-        socket.emit('message', { room, data: { type: "Vote", id: playerId, card: msg.data.card } });
+        tokiNanpa.send(room, { type: "Vote", id: tokiNanpa.me, card: msg.data.card });
     });
 
     // --------------------------
@@ -105,6 +83,6 @@ app.ports.playerOut.subscribe(msg => {
     }
     app.ports.statesOut.subscribe(msg => {
         console.log(`===> state: ${msg.data}`)
-        socket.emit('message', { room, data: { type: "State", state: msg.data } });
+        tokiNanpa.send(room, { type: "State", state: msg.data });
     });
 });
