@@ -11,7 +11,9 @@ black =
 
 accent : Element.Color
 accent =
-    hexToRgba "#1ad5bf"
+    -- hexToRgba "#1ad5bf"
+    hexToRgba "#00B3A1"
+    
 
 
 text : Element.Color

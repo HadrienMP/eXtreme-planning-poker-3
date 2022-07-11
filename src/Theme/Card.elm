@@ -3,7 +3,7 @@ module Theme.Card exposing (action, back, front, slot)
 import Element exposing (..)
 import Element.Background
 import Element.Border
-import Element.Font
+import Element.Font exposing (center)
 import Theme.Attributes exposing (class)
 import Theme.Colors exposing (..)
 import Theme.Theme exposing (noTextShadow)
@@ -34,56 +34,49 @@ back =
             none
 
 
-front : { label : String } -> Element msg
-front { label } =
-    front_ { label = label, size = Regular }
+front : { label : String, icon : Element msg } -> Element msg
+front { label, icon } =
+    front_ { label = label, type_ = Regular, icon = icon }
 
 
-action : { label : String } -> Element msg
-action { label } =
-    front_ { label = label, size = Small }
+action : { label : String, icon : Element msg } -> Element msg
+action { label, icon } =
+    front_ { label = label, type_ = Action, icon = icon }
 
 
-type ActionSize
-    = Regular
-    | Small
+type CardType
+    = Action
+    | Regular
 
 
-front_ : { label : String, size : ActionSize } -> Element msg
-front_ { label, size } =
+front_ : { label : String, type_ : CardType, icon : Element msg } -> Element msg
+front_ { label, type_, icon } =
     Element.el
         [ width <| px 80
         , height <| px 120
         , Element.Background.color white
         , Element.Border.rounded 8
         , Theme.Theme.boxShadow
+        , Element.Font.color Theme.Colors.accent
+        , Element.Font.bold
+        , Element.Font.size 10
+        , noTextShadow
         , padding 4
         ]
     <|
-        el
-            [ Element.Border.rounded 8
+        column
+            [ padding 4
+            , Element.Border.rounded 8
             , Element.Border.solid
             , Element.Border.color Theme.Colors.accent
             , Element.Border.width 2
             , width fill
             , height fill
             ]
-        <|
-            el
-                [ centerX
-                , centerY
-                , noTextShadow
-                , Element.Font.color Theme.Colors.accent
-                , Element.Font.bold
-                , case size of
-                    Regular ->
-                        Element.Font.size 20
-
-                    Small ->
-                        Element.Font.size 14
-                ]
-            <|
-                Element.text label
+            [ Element.text label
+            , el [ centerX, centerY ] <| icon
+            , el [ alignRight ] <| Element.text label
+            ]
 
 
 slot : Element msg

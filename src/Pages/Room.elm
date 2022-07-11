@@ -22,6 +22,7 @@ import Shared
 import Theme.Attributes exposing (..)
 import Theme.Card
 import Theme.Colors exposing (white)
+import Theme.Icons
 import Theme.Input
 import Theme.Theme exposing (ellipsisText, emptySides, featherIconToElement, pageWidth)
 
@@ -204,6 +205,22 @@ deck =
     [ "1", "TFB", "NFC" ] |> List.map Domain.Card.fromString
 
 
+iconOf : Card -> Element Msg
+iconOf card =
+    case Domain.Card.print card of
+        "1" ->
+            Theme.Icons.sparkles { height = 32, color = Theme.Colors.accent }
+
+        "TFB" ->
+            Theme.Icons.elephant { height = 32, color = Theme.Colors.accent }
+
+        "NFC" ->
+            Theme.Icons.questionMark { height = 32, color = Theme.Colors.accent }
+
+        _ ->
+            Element.none
+
+
 view : Shared.Model -> Model -> Element Msg
 view shared model =
     case shared of
@@ -260,7 +277,7 @@ displayCardSlot state data =
                             Theme.Card.back
 
                         Chosen ->
-                            { label = Domain.Card.print card } |> Theme.Card.front
+                            Theme.Card.front { label = Domain.Card.print card, icon = iconOf card }
                 )
             |> Maybe.withDefault Theme.Card.slot
         , ellipsisText [ Font.center, Font.size 16 ] <|
@@ -297,30 +314,38 @@ displayDeck model shared =
 
 displayDeckCards : Maybe Card -> Shared.Complete -> Element Msg
 displayDeckCards selected shared =
-    row [ spacing 10, centerX ] <| List.map (displayCard selected shared) <| deck
+    row [ spacing 10, centerX ] <| List.indexedMap (displayCard selected shared) <| List.reverse <| deck
 
 
-displayCard : Maybe Card -> Shared.Complete -> Card -> Element Msg
-displayCard selected shared card =
-    if Just card == selected then
-        Input.button [ moveUp 8, class "selected" ]
-            { onPress = Vote shared.player.id Maybe.Nothing |> Voted |> Just
-            , label = Theme.Card.front { label = Domain.Card.print card }
-            }
+displayCard : Maybe Card -> Shared.Complete -> Int -> Card -> Element Msg
+displayCard selected shared index card =
+    el
+        [ rotate <|
+            if Just card == selected then
+                (toFloat (index - 1) * 0.2) + 0.05
 
-    else
-        Input.button
-            [ alpha <|
-                if selected == Nothing then
-                    1
+            else
+                0.0
+        ]
+    <|
+        if Just card == selected then
+            Input.button [ moveUp 8, class "selected" ]
+                { onPress = Vote shared.player.id Maybe.Nothing |> Voted |> Just
+                , label = Theme.Card.front { label = Domain.Card.print card, icon = iconOf card }
+                }
 
-                else
-                    0.8
-            ]
-            { onPress = Just <| Voted <| Vote shared.player.id (Just card)
-            , label = Theme.Card.front { label = Domain.Card.print card }
-            }
+        else
+            Input.button
+                [ scale <|
+                    if selected == Nothing then
+                        1
 
+                    else
+                        0.95
+                ]
+                { onPress = Just <| Voted <| Vote shared.player.id (Just card)
+                , label = Theme.Card.front { label = Domain.Card.print card, icon = iconOf card }
+                }
 
 revealRestartButton : Model -> Element Msg
 revealRestartButton model =
@@ -342,6 +367,13 @@ revealRestartButton model =
 
                         Chosen ->
                             "Restart"
+                , icon =
+                    case model.state of
+                        Choosing ->
+                            Theme.Icons.eye { height = 32, color = Theme.Colors.accent }
+
+                        Chosen ->
+                            Theme.Icons.restart { height = 32, color = Theme.Colors.accent }
                 }
         }
 
