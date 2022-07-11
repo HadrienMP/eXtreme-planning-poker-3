@@ -318,14 +318,20 @@ displayDeckCards selected shared =
 
 
 displayCard : Maybe Card -> Shared.Complete -> Int -> Card -> Element Msg
-displayCard selected shared index card =
+displayCard selected shared _ card =
     el
         [ rotate <|
             if Just card == selected then
-                (toFloat (index - 1) * 0.2) + 0.05
+                0.05
 
             else
                 0.0
+        , alpha <|
+            if Just card == selected || selected == Nothing then
+                1
+
+            else
+                0.8
         ]
     <|
         if Just card == selected then

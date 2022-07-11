@@ -94,9 +94,9 @@ textShadow =
 boxShadow : Attribute msg
 boxShadow =
     Border.shadow
-        { offset = ( 1, 2 )
-        , size = 2
-        , blur = 2
+        { offset = ( 1, 1 )
+        , size = 1
+        , blur = 1
         , color = Theme.Colors.black |> moreTransparent 7
         }
 

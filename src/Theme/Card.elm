@@ -3,7 +3,7 @@ module Theme.Card exposing (action, back, front, slot)
 import Element exposing (..)
 import Element.Background
 import Element.Border
-import Element.Font exposing (center)
+import Element.Font
 import Theme.Attributes exposing (class)
 import Theme.Colors exposing (..)
 import Theme.Theme exposing (noTextShadow)
@@ -50,7 +50,7 @@ type CardType
 
 
 front_ : { label : String, type_ : CardType, icon : Element msg } -> Element msg
-front_ { label, type_, icon } =
+front_ { label, icon } =
     Element.el
         [ width <| px 80
         , height <| px 120
