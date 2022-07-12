@@ -18,3 +18,7 @@ app.ports.playerOut.subscribe(playerOutMsg => {
     app.ports.votesOut.subscribe(msg => room.sendVote(msg.data));
     app.ports.statesOut.subscribe(msg => room.sendState(msg.data));
 });
+
+app.ports.log.subscribe(console.log);
+app.ports.warn.subscribe(console.warn);
+app.ports.error.subscribe(console.error);

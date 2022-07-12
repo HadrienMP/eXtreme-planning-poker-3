@@ -1,6 +1,7 @@
 module Effect exposing (..)
 
 import Browser.Navigation
+import Console
 import Domain.GameState as GameState exposing (GameState)
 import Domain.Player as Player exposing (Player)
 import Domain.RoomName exposing (RoomName)
@@ -15,6 +16,9 @@ type AtomicEffect
     | ShareVote RoomName Vote
     | SharePlayer RoomName Player
     | ShareState RoomName GameState
+    | Log String
+    | Error String
+    | Warn String
 
 
 type Effect
@@ -54,6 +58,15 @@ performAtomic key effect =
 
         ShareState room state ->
             GameState.sendOut room state
+
+        Log msg ->
+            Console.log msg
+
+        Error msg ->
+            Console.error msg
+
+        Warn msg ->
+            Console.warn msg
 
 
 none : Effect
@@ -120,3 +133,22 @@ load =
 loadRoute : Route -> Effect
 loadRoute route =
     Atomic <| LoadUrl <| Routes.toString route
+
+
+
+-- Console
+
+
+error : String -> Effect
+error =
+    Atomic << Error
+
+
+warn : String -> Effect
+warn =
+    Atomic << Warn
+
+
+log : String -> Effect
+log =
+    Atomic << Log

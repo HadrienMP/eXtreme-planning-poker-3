@@ -90,9 +90,7 @@ update msg model =
                         |> Result.toMaybe
                         |> (\it -> SettingUp { subModel | playerId = it })
 
-                -- TODO HMP do something with the error
                 Validate ->
-                    -- TODO HMP do some error handling here, maybe display a help message
                     case ( Domain.Nickname.create subModel.nickname, subModel.playerId ) of
                         ( Just nickname, Just playerId ) ->
                             Ready { player = { nickname = nickname, id = playerId } }

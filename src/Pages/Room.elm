@@ -15,7 +15,6 @@ import Element.Font as Font
 import Element.Input as Input
 import Element.Region as Region
 import FeatherIcons
-import Html.Attributes
 import Json.Decode as Decode
 import Lib.UpdateResult exposing (UpdateResult)
 import Shared
@@ -126,7 +125,10 @@ update shared msg model =
                     }
 
                 Err error ->
-                    Debug.todo <| (++) "log this with a real port, " <| Decode.errorToString error
+                    { model = model
+                    , shared = shared
+                    , effect = Effect.error <| (++) "log this with a real port, " <| Decode.errorToString error
+                    }
 
         GotVote json ->
             case Decode.decodeValue Vote.decoder json of
@@ -137,7 +139,10 @@ update shared msg model =
                     }
 
                 Err error ->
-                    Debug.todo <| (++) "log this with a real port, " <| Decode.errorToString error
+                    { model = model
+                    , shared = shared
+                    , effect = Effect.error <| (++) "log this with a real port, " <| Decode.errorToString error
+                    }
 
         GotState json ->
             case Decode.decodeValue GameState.decoder json of
@@ -157,7 +162,10 @@ update shared msg model =
                     }
 
                 Err error ->
-                    Debug.todo <| (++) "log this with a real port, " <| Decode.errorToString error
+                    { model = model
+                    , shared = shared
+                    , effect = Effect.error <| (++) "log this with a real port, " <| Decode.errorToString error
+                    }
 
         PlayerLeft json ->
             case Decode.decodeValue PlayerId.decoder json of
@@ -168,7 +176,10 @@ update shared msg model =
                     }
 
                 Err error ->
-                    Debug.todo <| (++) "log this with a real port, " <| Decode.errorToString error
+                    { model = model
+                    , shared = shared
+                    , effect = Effect.error <| (++) "log this with a real port, " <| Decode.errorToString error
+                    }
 
 
 addPlayer : Shared.Model -> Dict PlayerId Nickname -> Dict PlayerId Nickname
@@ -268,7 +279,7 @@ linkCard votes ( id, nickname ) =
 displayCardSlot : GameState -> CardSlotData -> Element Msg
 displayCardSlot state data =
     column
-        [ htmlAttribute <| Html.Attributes.class "card-slot", spacing 6, width <| px 80 ]
+        [ class "card-slot", spacing 6, width <| px 80 ]
         [ data.card
             |> Maybe.map
                 (\card ->
@@ -352,6 +363,7 @@ displayCard selected shared _ card =
                 { onPress = Just <| Voted <| Vote shared.player.id (Just card)
                 , label = Theme.Card.front { label = Domain.Card.print card, icon = iconOf card }
                 }
+
 
 revealRestartButton : Model -> Element Msg
 revealRestartButton model =

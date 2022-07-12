@@ -92,6 +92,15 @@ simulateAtomicEffects effect =
         ShareState _ state ->
             SimulatedEffect.Ports.send Ports.statesOut (GameState.json state)
 
+        Log _ ->
+            SimulatedEffect.Cmd.none
+
+        Warn _ ->
+            SimulatedEffect.Cmd.none
+
+        Error _ ->
+            SimulatedEffect.Cmd.none
+
 
 simulateSubscriptions : Main.Model () -> ProgramTest.SimulatedSub Main.Msg
 simulateSubscriptions _ =
