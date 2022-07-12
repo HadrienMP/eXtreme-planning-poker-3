@@ -3,14 +3,13 @@ module Main exposing (..)
 import Browser exposing (UrlRequest)
 import Browser.Navigation exposing (Key)
 import Effect exposing (Effect)
-import Element exposing (Element)
+import Element exposing (Element, centerX, centerY, column, el, fill, height, none, width)
 import Lib.UpdateResult exposing (UpdateResult)
 import Pages.Home
 import Pages.Room
 import Routes
 import Shared
-import Theme.Attributes exposing (id)
-import Theme.Theme exposing (layout)
+import Theme.Theme exposing (connectingToBack, layout, pageWidth)
 import Url exposing (Url)
 
 
@@ -166,11 +165,14 @@ view model =
     { title = "App"
     , body =
         [ layout <|
-            if Shared.hasPlayerId model.shared then
-                displayPage model
+            column [ width fill, height fill ]
+                [ el [ pageWidth, centerX, centerY ] <| displayPage model
+                , if Shared.hasPlayerId model.shared then
+                    none
 
-            else
-                Element.el [ id "loader" ] <| Element.text "Loading"
+                  else
+                    connectingToBack
+                ]
         ]
     }
 

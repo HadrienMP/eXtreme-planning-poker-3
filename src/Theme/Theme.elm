@@ -6,9 +6,10 @@ import Element.Border as Border
 import Element.Font as Font
 import FeatherIcons exposing (Icon)
 import Html exposing (Html)
-import Html.Attributes
+import Html.Attributes exposing (style)
 import String exposing (concat)
-import Theme.Colors exposing (hexToRgba, moreTransparent, white)
+import Theme.Attributes exposing (id)
+import Theme.Colors as Colors exposing (hexToRgba, moreTransparent, white)
 
 
 pageBackground : List (Attribute msg)
@@ -71,15 +72,10 @@ layout =
             ]
         }
         (pageBackground
-            ++ [ Font.color Theme.Colors.text
+            ++ [ Font.color Colors.text
                , textShadow
                ]
         )
-        << el
-            [ centerX
-            , centerY
-            , pageWidth
-            ]
 
 
 textShadow : Attribute msg
@@ -87,7 +83,7 @@ textShadow =
     Font.shadow
         { offset = ( 1, 1 )
         , blur = 1
-        , color = Theme.Colors.black
+        , color = Colors.black
         }
 
 
@@ -97,7 +93,7 @@ boxShadow =
         { offset = ( 1, 1 )
         , size = 1
         , blur = 1
-        , color = Theme.Colors.black |> moreTransparent 7
+        , color = Colors.black |> moreTransparent 7
         }
 
 
@@ -145,3 +141,18 @@ bottomBorder =
     , Border.widthEach { emptySides | bottom = 2 }
     , Border.color white
     ]
+
+
+connectingToBack : Element msg
+connectingToBack =
+    el
+        [ Background.color Colors.redC
+        , Border.rounded 100
+        , height <| px 10
+        , width <| px 10
+        , htmlAttribute <| style "position" "absolute"
+        , htmlAttribute <| style "top" "20px"
+        , htmlAttribute <| style "right" "20px"
+        , id "loader"
+        ]
+        none

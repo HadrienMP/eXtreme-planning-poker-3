@@ -13,7 +13,6 @@ accent : Element.Color
 accent =
     -- hexToRgba "#1ad5bf"
     hexToRgba "#00B3A1"
-    
 
 
 text : Element.Color
@@ -43,6 +42,11 @@ placeholder =
 white : Element.Color
 white =
     hexToRgba "#ffffff"
+
+
+redC : Element.Color
+redC =
+    hexToRgba "#ff0000"
 
 
 transparent : Element.Color
