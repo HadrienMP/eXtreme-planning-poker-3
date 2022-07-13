@@ -4,13 +4,14 @@ const noop = () => { };
 
 let socket = null;
 let msgCbck = noop;
-let joinedCbck = noop;
 let leftCbck = noop;
+let joinedCbck = noop;
 export let me = null;
 
 export const onMessage = (cbck) => msgCbck = cbck;
-export const onPeerJoined = (cbck) => joinedCbck = cbck;
 export const onPeerLeft = (cbck) => leftCbck = cbck;
+export const onPeerJoined = (cbck) => joinedCbck = cbck;
+
 export const connect = (onConnection = noop) => {
     socket = io("https://toki-nanpa.onrender.com");
     socket.on('connect', () => {
@@ -19,22 +20,16 @@ export const connect = (onConnection = noop) => {
         return onConnection(socket.id);
     });
 
-    // -----------------------
-    // Message
-    // -----------------------
     socket.on('message', (msg) => {
-        msgCbck(msg);
-    })
-
-    // -----------------------
-    // Peer
-    // -----------------------
-    socket.on('peer', msg => {
+        console.log('IN ',{ ...msg });
         switch (msg.type) {
-            case "joined":
-                joinedCbck(msg.peer);
+            case "message":
+                msgCbck(msg);
                 break;
-            case "disconnecting":
+            case "joined":
+                joinedCbck(msg);
+                break;
+            case "left":
                 leftCbck(msg);
                 break;
             default:
@@ -44,5 +39,7 @@ export const connect = (onConnection = noop) => {
     })
 };
 
-export const joinRoom = (room) => socket.emit('join', { data: room });
-export const send = (room, data) => socket.emit('message', { room, data });
+export const send = (room, data) => {
+    console.log('OUT',{ room, data });
+    return socket.emit('message', { room, data });
+};

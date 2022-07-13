@@ -7,10 +7,12 @@ export const playerLeftMsgType = 'PlayerLeft';
 export const join = (currentRoom, tokiNanpa, listeners = { onPlayer, onVote, onState, onPlayerLeft }) => {
     const history = [];
 
-    tokiNanpa.joinRoom(currentRoom);
-
-    tokiNanpa.onPeerLeft(({ room, peer }) => handleSingleMessage({room, data: {type: playerLeftMsgType, id: peer}}));
-    tokiNanpa.onPeerJoined((peer) => peer !== tokiNanpa.me ? tokiNanpa.send(currentRoom, { type: historyMsgType, history }) : null);
+    tokiNanpa.onPeerLeft(({ room, from:peer }) => handleSingleMessage({room, data: {type: playerLeftMsgType, id: peer}}));
+    tokiNanpa.onPeerJoined(({ from: peer }) => {
+        if (peer !== tokiNanpa.me) {
+            return tokiNanpa.send(currentRoom, { type: historyMsgType, history });
+        }
+    });
     tokiNanpa.onMessage((msg) => {
         if (msg.data.type === historyMsgType && history !== []) {
             msg.data.history.forEach(handleSingleMessage);
