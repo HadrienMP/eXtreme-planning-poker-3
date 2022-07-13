@@ -49,6 +49,11 @@ getPlayer =
     getComplete >> Maybe.map .player
 
 
+getPlayerId : Model -> Maybe PlayerId
+getPlayerId =
+    getPlayer >> Maybe.map .id
+
+
 hasPlayerId : Model -> Bool
 hasPlayerId model =
     case model of

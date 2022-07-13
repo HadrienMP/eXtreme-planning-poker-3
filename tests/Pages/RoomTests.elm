@@ -91,7 +91,14 @@ cardsRevealed =
 
 choosingCards : List Test
 choosingCards =
-    [ describe "my actions"
+    [ myActions
+    , peerActions
+    ]
+
+
+myActions : Test
+myActions =
+    describe "my actions"
         [ test "arriving in room - click a card on your deck to choose a card" <|
             withMaybe2 ( Room.fromString "dabest", PlayerId.create "playerId-joba" ) <|
                 \( room, playerId ) ->
@@ -103,10 +110,8 @@ choosingCards =
                         |> ensureCardIsSelected "TFB"
                         |> clickButton "Reveal"
                         |> ensureViewHas
-                            [ Selector.all
-                                [ Selector.class "card-slot"
-                                , Selector.containing [ Selector.text "TFB" ]
-                                ]
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text "TFB" ]
                             ]
                         |> ensureVotesOut [ Vote.Vote playerId (Just <| Card.fromString "TFB") ]
                         |> done
@@ -118,10 +123,8 @@ choosingCards =
                         |> ensureCardIsSelected "TFB"
                         |> clickButton "Reveal"
                         |> ensureViewHas
-                            [ Selector.all
-                                [ Selector.class "card-slot"
-                                , Selector.containing [ Selector.text "TFB" ]
-                                ]
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text "TFB" ]
                             ]
                         |> ensureVotesOut [ Vote.Vote playerId (Just <| Card.fromString "TFB") ]
                         |> done
@@ -161,10 +164,8 @@ choosingCards =
                     |> clickButton "1"
                     |> clickButton "Reveal"
                     |> ensureViewHas
-                        [ Selector.all
-                            [ Selector.class "card-slot"
-                            , Selector.containing [ Selector.text "1" ]
-                            ]
+                        [ Selector.class "card-slot"
+                        , Selector.containing [ Selector.text "1" ]
                         ]
                     |> done
         , test "clicking Reveal reveals the votes" <|
@@ -173,25 +174,25 @@ choosingCards =
                     |> clickButton "TFB"
                     |> clickButton "Reveal"
                     |> ensureViewHas
-                        [ Selector.all
-                            [ Selector.class "card-slot"
-                            , Selector.containing [ Selector.text "TFB" ]
-                            ]
+                        [ Selector.class "card-slot"
+                        , Selector.containing [ Selector.text "TFB" ]
                         ]
                     |> ensureStatesOut [ GameState.Chosen ]
                     |> done
         ]
-    , describe "peer actions"
+
+
+peerActions : Test
+peerActions =
+    describe "peer actions"
         [ test "Emma joined" <|
             withPlayer "emma" <|
                 \emma ->
                     join { room = "dabest", player = "Pierre" }
                         |> simulateIncomingPort Ports.playersIn (Player.json emma)
                         |> ensureViewHas
-                            [ Selector.all
-                                [ Selector.class "card-slot"
-                                , Selector.containing [ Selector.text <| Nickname.print <| emma.nickname ]
-                                ]
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text <| Nickname.print <| emma.nickname ]
                             ]
                         |> done
         , test "Emma voted" <|
@@ -202,10 +203,8 @@ choosingCards =
                         |> simulateIncomingPort Ports.votesIn (Vote.json (Vote.Vote emma.id <| Just <| Card.fromString "TFB"))
                         |> clickButton "Reveal"
                         |> ensureViewHas
-                            [ Selector.all
-                                [ Selector.class "card-slot"
-                                , Selector.containing [ Selector.text "TFB" ]
-                                ]
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text "TFB" ]
                             ]
                         |> done
         , test "Emma revealed the cards" <|
@@ -216,10 +215,8 @@ choosingCards =
                         |> simulateIncomingPort Ports.votesIn (Vote.json (Vote.Vote emma.id <| Just <| Card.fromString "TFB"))
                         |> simulateIncomingPort Ports.statesIn (GameState.json GameState.Chosen)
                         |> ensureViewHas
-                            [ Selector.all
-                                [ Selector.class "card-slot"
-                                , Selector.containing [ Selector.text "TFB" ]
-                                ]
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text "TFB" ]
                             ]
                         |> done
         , test "Emma restarted the game, the votes are reset" <|
@@ -246,8 +243,23 @@ choosingCards =
                                 ]
                             ]
                         |> done
+        , test "Messages saying that you left are ignored - we never want you to disappear" <|
+            withPlayer "Pierre" <|
+                \me ->
+                    join { room = "dabest", player = Nickname.print me.nickname }
+                        |> ensureViewHas
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text <| Nickname.print me.nickname ]
+                            ]
+                        |> simulateIncomingPort Ports.playerLeft (PlayerId.json me.id)
+                        |> ensureViewHas
+                            [ Selector.all
+                                [ Selector.class "card-slot"
+                                , Selector.containing [ Selector.text <| Nickname.print me.nickname ]
+                                ]
+                            ]
+                        |> done
         ]
-    ]
 
 
 ensureCardIsSelected : String -> ProgramTest (Main.Model ()) Main.Msg Effect -> ProgramTest (Main.Model ()) Main.Msg Effect
@@ -304,10 +316,8 @@ initialDisplay =
         \_ ->
             join { room = "dabest", player = "Joba" }
                 |> ensureViewHas
-                    [ Selector.all
-                        [ Selector.class "card-slot"
-                        , Selector.containing [ Selector.text "Joba" ]
-                        ]
+                    [ Selector.class "card-slot"
+                    , Selector.containing [ Selector.text "Joba" ]
                     ]
                 |> done
     ]

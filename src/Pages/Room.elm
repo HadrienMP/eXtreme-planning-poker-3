@@ -127,7 +127,7 @@ update shared msg model =
                 Err error ->
                     { model = model
                     , shared = shared
-                    , effect = Effect.error <| (++) "log this with a real port, " <| Decode.errorToString error
+                    , effect = Effect.error <| Decode.errorToString error
                     }
 
         GotVote json ->
@@ -141,7 +141,7 @@ update shared msg model =
                 Err error ->
                     { model = model
                     , shared = shared
-                    , effect = Effect.error <| (++) "log this with a real port, " <| Decode.errorToString error
+                    , effect = Effect.error <| Decode.errorToString error
                     }
 
         GotState json ->
@@ -164,22 +164,34 @@ update shared msg model =
                 Err error ->
                     { model = model
                     , shared = shared
-                    , effect = Effect.error <| (++) "log this with a real port, " <| Decode.errorToString error
+                    , effect = Effect.error <| Decode.errorToString error
                     }
 
         PlayerLeft json ->
             case Decode.decodeValue PlayerId.decoder json of
                 Ok playerId ->
-                    { model = { model | players = Dict.remove playerId model.players }
+                    { model =
+                        { model
+                            | players =
+                                if Just playerId == Shared.getPlayerId shared then
+                                    model.players
+
+                                else
+                                    Dict.remove playerId model.players
+                        }
                     , shared = shared
                     , effect = Effect.none
                     }
 
                 Err error ->
-                    { model = model
-                    , shared = shared
-                    , effect = Effect.error <| (++) "log this with a real port, " <| Decode.errorToString error
-                    }
+                    Debug.todo <| Decode.errorToString error
+
+
+
+-- { model = model
+-- , shared = shared
+-- , effect = Effect.error <| Decode.errorToString error
+-- }
 
 
 addPlayer : Shared.Model -> Dict PlayerId Nickname -> Dict PlayerId Nickname
