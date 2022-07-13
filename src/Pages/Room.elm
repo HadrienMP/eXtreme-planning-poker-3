@@ -184,14 +184,10 @@ update shared msg model =
                     }
 
                 Err error ->
-                    Debug.todo <| Decode.errorToString error
-
-
-
--- { model = model
--- , shared = shared
--- , effect = Effect.error <| Decode.errorToString error
--- }
+                    { model = model
+                    , shared = shared
+                    , effect = Effect.error <| Decode.errorToString error
+                    }
 
 
 addPlayer : Shared.Model -> Dict PlayerId Nickname -> Dict PlayerId Nickname
