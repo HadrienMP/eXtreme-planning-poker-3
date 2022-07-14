@@ -5,43 +5,22 @@ export const historyMsgType = 'History';
 export const playerLeftMsgType = 'PlayerLeft';
 
 export const join = (currentRoom, tokiNanpa, listeners = { onPlayer, onVote, onState, onPlayerLeft }) => {
+    
     const history = [];
+    const handleSingleMsg = handleSingleMessage(listeners, history);
 
-    tokiNanpa.onPeerLeft(({ room, from:peer }) => handleSingleMessage({room, data: {type: playerLeftMsgType, id: peer}}));
+    tokiNanpa.onPeerLeft(({ room, from:peer }) => handleSingleMsg({room, data: {type: playerLeftMsgType, id: peer}}));
     tokiNanpa.onPeerJoined(({ from: peer }) => {
         if (peer !== tokiNanpa.me) {
-            return tokiNanpa.send(currentRoom, { type: historyMsgType, history });
+            tokiNanpa.sendDM(peer, { type: historyMsgType, history });
         }
     });
-    tokiNanpa.onMessage((msg) => {
+    tokiNanpa.onMessage(handleSingleMsg);
+    tokiNanpa.onDM((msg) => {
         if (msg.data.type === historyMsgType && history !== []) {
-            msg.data.history.forEach(handleSingleMessage);
-        } else {
-            handleSingleMessage(msg);
+            msg.data.history.forEach(handleSingleMsg);
         }
     });
-
-    const handleSingleMessage = (msg) => {
-        history.push(msg);
-        const { data } = msg;
-        switch (data.type) {
-            case playerMsgType:
-                listeners.onPlayer(data);
-                break;
-            case voteplayerMsgType:
-                listeners.onVote(data);
-                break;
-            case stateMsgType:
-                listeners.onState(data);
-                break;
-            case playerLeftMsgType:
-                listeners.onPlayerLeft(data.id);
-                break;            
-            default:
-                console.error('unknown message: ' + JSON.stringify(msg));
-                break;
-        }
-    }
 
     return ({
         sendPlayer: (player) => tokiNanpa.send(currentRoom, { type: playerMsgType, ...player }),
@@ -49,3 +28,25 @@ export const join = (currentRoom, tokiNanpa, listeners = { onPlayer, onVote, onS
         sendState: (state) => tokiNanpa.send(currentRoom, { type: stateMsgType, state }),
     });
 };
+
+const handleSingleMessage = (listeners, history) => (msg) => {
+    history.push(msg);
+    const { data } = msg;
+    switch (data.type) {
+        case playerMsgType:
+            listeners.onPlayer(data);
+            break;
+        case voteplayerMsgType:
+            listeners.onVote(data);
+            break;
+        case stateMsgType:
+            listeners.onState(data);
+            break;
+        case playerLeftMsgType:
+            listeners.onPlayerLeft(data.id);
+            break;            
+        default:
+            console.error('unknown message: ' + JSON.stringify(msg));
+            break;
+    }
+}

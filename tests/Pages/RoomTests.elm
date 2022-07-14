@@ -259,6 +259,18 @@ peerActions =
                                 ]
                             ]
                         |> done
+        , test "emma left then joined again" <|
+            withPlayer "Emma" <|
+                \emma ->
+                    join { room = "dabest", player = "Pierre" }
+                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
+                        |> simulateIncomingPort Ports.playerLeft (PlayerId.json emma.id)
+                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
+                        |> ensureViewHas
+                            [ Selector.class "card-slot"
+                            , Selector.containing [ Selector.text <| Nickname.print emma.nickname ]
+                            ]
+                        |> done
         ]
 
 
