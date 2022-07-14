@@ -1,4 +1,4 @@
-module Utils exposing (..)
+module Test.Utils exposing (..)
 
 import Domain.Nickname as Nickname
 import Domain.Player exposing (Player)
@@ -13,10 +13,9 @@ inRoom room testF =
     withMaybe (Domain.RoomName.fromString room) (Routes.Room >> testF)
 
 
-withPlayer : String -> (Player -> Expect.Expectation) -> () -> Expect.Expectation
-withPlayer nickname testF =
-    withMaybe2 ( PlayerId.create <| "id-of-" ++ nickname, Nickname.create nickname ) <|
-        \( id, nick ) -> testF <| Player id nick
+withPlayer : Player -> (Player -> Expect.Expectation) -> () -> Expect.Expectation
+withPlayer player testF =
+    \_ -> testF player
 
 
 withMaybe : Maybe a -> (a -> Expect.Expectation) -> () -> Expect.Expectation

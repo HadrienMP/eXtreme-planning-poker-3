@@ -6,7 +6,7 @@ import Domain.PlayerId as PlayerId
 import Expect
 import Json.Decode as Decode
 import Test exposing (..)
-import Utils exposing (..)
+import Test.Utils exposing (..)
 
 
 all : Test

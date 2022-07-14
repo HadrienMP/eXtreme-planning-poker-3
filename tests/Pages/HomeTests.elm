@@ -7,7 +7,7 @@ import Routes
 import Test exposing (..)
 import Test.Html.Query as Query
 import Test.Html.Selector as Selector
-import TestSetup exposing (..)
+import Test.TestSetup exposing (..)
 
 
 all : Test

@@ -5,6 +5,6 @@
   "suppressions": [
     { "count": 1, "filePath": "src/Pages/Home.elm" },
     { "count": 1, "filePath": "src/Pages/Room.elm" },
-    { "count": 1, "filePath": "tests/TestSetup.elm" }
+    { "count": 1, "filePath": "tests/Test/TestSetup.elm" }
   ]
 }

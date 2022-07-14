@@ -6,7 +6,7 @@ import Domain.Vote as Vote
 import Expect
 import Json.Decode
 import Test exposing (..)
-import Utils exposing (..)
+import Test.Utils exposing (..)
 
 
 all : Test

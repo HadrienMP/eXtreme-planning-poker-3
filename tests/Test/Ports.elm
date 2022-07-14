@@ -1,4 +1,4 @@
-module Ports exposing (..)
+module Test.Ports exposing (..)
 
 import Domain.GameState as GameState exposing (GameState)
 import Domain.Player as Player exposing (Player)
@@ -13,11 +13,15 @@ playerOut =
 
 
 ensurePlayerOut : Player -> ProgramTest model msg effect -> ProgramTest model msg effect
-ensurePlayerOut player =
-    ensureOutgoingPortValues
-        playerOut
-        Player.decoder
-        (Expect.equal [ player ])
+ensurePlayerOut =
+    ensurePlayerOutTimes 1
+
+
+ensurePlayerOutTimes : Int -> Player -> ProgramTest model msg effect -> ProgramTest model msg effect
+ensurePlayerOutTimes times player =
+    ensureOutgoingPortValues playerOut Player.decoder <|
+        Expect.equal <|
+            List.repeat times player
 
 
 playersIn : String

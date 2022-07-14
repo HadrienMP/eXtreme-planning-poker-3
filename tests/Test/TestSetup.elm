@@ -1,4 +1,4 @@
-module TestSetup exposing (..)
+module Test.TestSetup exposing (..)
 
 import Domain.GameState as GameState
 import Domain.Player as Player
@@ -11,7 +11,6 @@ import Json.Encode
 import Lib.NonEmptyString as NonEmptyString
 import Main
 import Pages.Room
-import Ports
 import ProgramTest exposing (..)
 import Routes exposing (Route)
 import Shared
@@ -20,6 +19,7 @@ import SimulatedEffect.Navigation
 import SimulatedEffect.Ports
 import SimulatedEffect.Sub
 import Test.Html.Selector as Selector
+import Test.Ports
 
 
 baseUrl : String
@@ -84,13 +84,13 @@ simulateAtomicEffects effect =
             SimulatedEffect.Navigation.load url
 
         ShareVote _ vote ->
-            SimulatedEffect.Ports.send Ports.votesOut (Vote.json vote)
+            SimulatedEffect.Ports.send Test.Ports.votesOut (Vote.json vote)
 
         SharePlayer _ player ->
-            SimulatedEffect.Ports.send Ports.playerOut (Player.json player)
+            SimulatedEffect.Ports.send Test.Ports.playerOut (Player.json player)
 
         ShareState _ state ->
-            SimulatedEffect.Ports.send Ports.statesOut (GameState.json state)
+            SimulatedEffect.Ports.send Test.Ports.statesOut (GameState.json state)
 
         Log _ ->
             SimulatedEffect.Cmd.none
@@ -108,16 +108,16 @@ simulateSubscriptions _ =
         [ SimulatedEffect.Ports.subscribe "playerId"
             Json.Decode.value
             (Main.GotSharedMsg << Shared.GotPlayerId)
-        , SimulatedEffect.Ports.subscribe Ports.playersIn
+        , SimulatedEffect.Ports.subscribe Test.Ports.playersIn
             Json.Decode.value
             (Main.GotRoomMsg << Pages.Room.GotPlayer)
-        , SimulatedEffect.Ports.subscribe Ports.votesIn
+        , SimulatedEffect.Ports.subscribe Test.Ports.votesIn
             Json.Decode.value
             (Main.GotRoomMsg << Pages.Room.GotVote)
-        , SimulatedEffect.Ports.subscribe Ports.statesIn
+        , SimulatedEffect.Ports.subscribe Test.Ports.statesIn
             Json.Decode.value
             (Main.GotRoomMsg << Pages.Room.GotState)
-        , SimulatedEffect.Ports.subscribe Ports.playerLeft
+        , SimulatedEffect.Ports.subscribe Test.Ports.playerLeft
             Json.Decode.value
             (Main.GotRoomMsg << Pages.Room.PlayerLeft)
         ]

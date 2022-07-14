@@ -3,8 +3,8 @@ module RoutesTests exposing (..)
 import Expect
 import Routes exposing (parseRoute)
 import Test exposing (Test, describe, test)
+import Test.Utils exposing (inRoom)
 import Url
-import Utils exposing (inRoom)
 
 
 suite : Test

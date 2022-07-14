@@ -3,19 +3,20 @@ module Pages.RoomTests exposing (..)
 import Domain.Card as Card
 import Domain.GameState as GameState
 import Domain.Nickname as Nickname
-import Domain.Player as Player
+import Domain.Player as Player exposing (Player)
 import Domain.PlayerId as PlayerId exposing (PlayerId)
 import Domain.RoomName as Room
 import Domain.Vote as Vote
 import Effect exposing (Effect)
 import Main
-import Ports exposing (ensurePlayerOut, ensureStatesOut, ensureVotesOut)
 import ProgramTest exposing (..)
 import Routes
 import Test exposing (..)
+import Test.Fixtures exposing (emma, pierre, playerNamed)
 import Test.Html.Selector as Selector
-import TestSetup exposing (..)
-import Utils exposing (..)
+import Test.Ports exposing (ensurePlayerOut, ensurePlayerOutTimes, ensureStatesOut, ensureVotesOut)
+import Test.TestSetup exposing (..)
+import Test.Utils exposing (..)
 
 
 all : Test
@@ -61,13 +62,13 @@ cardsRevealed : List Test
 cardsRevealed =
     [ test "the deck is not visible" <|
         \_ ->
-            join { room = "dabest", player = "Joba" }
+            join { room = "dabest", player = playerNamed "Joba" }
                 |> clickButton "Reveal"
                 |> ensureViewHasNot [ Selector.id "my-deck" ]
                 |> done
     , test "clicking on restart resets the vote" <|
         \_ ->
-            join { room = "dabest", player = "Joba" }
+            join { room = "dabest", player = playerNamed "Joba" }
                 |> clickButton "TFB"
                 |> clickButton "Reveal"
                 |> clickButton "Restart"
@@ -81,7 +82,7 @@ cardsRevealed =
                 |> done
     , test "clicking on restart reveals the deck" <|
         \_ ->
-            join { room = "dabest", player = "Joba" }
+            join { room = "dabest", player = playerNamed "Joba" }
                 |> clickButton "Reveal"
                 |> clickButton "Restart"
                 |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "Joba" ] ] ]
@@ -130,7 +131,7 @@ myActions =
                         |> done
         , test "before revealing cards are hidden" <|
             \_ ->
-                join { room = "dabest", player = "Joba" }
+                join { room = "dabest", player = playerNamed "Joba" }
                     |> clickButton "TFB"
                     |> ensureViewHasNot
                         [ Selector.all
@@ -159,7 +160,7 @@ myActions =
                         |> done
         , test "clicking a card then another changes the vote" <|
             \_ ->
-                join { room = "dabest", player = "Joba" }
+                join { room = "dabest", player = playerNamed "Joba" }
                     |> clickButton "TFB"
                     |> clickButton "1"
                     |> clickButton "Reveal"
@@ -170,7 +171,7 @@ myActions =
                     |> done
         , test "clicking Reveal reveals the votes" <|
             \_ ->
-                join { room = "dabest", player = "Joba" }
+                join { room = "dabest", player = playerNamed "Joba" }
                     |> clickButton "TFB"
                     |> clickButton "Reveal"
                     |> ensureViewHas
@@ -186,21 +187,21 @@ peerActions : Test
 peerActions =
     describe "peer actions"
         [ test "Emma joined" <|
-            withPlayer "emma" <|
+            withPlayer emma <|
                 \emma ->
-                    join { room = "dabest", player = "Pierre" }
-                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
+                    join { room = "dabest", player = playerNamed "Pierre" }
+                        |> simulateIncomingPort Test.Ports.playersIn (Player.json emma)
                         |> ensureViewHas
                             [ Selector.class "card-slot"
                             , Selector.containing [ Selector.text <| Nickname.print <| emma.nickname ]
                             ]
                         |> done
         , test "Emma voted" <|
-            withPlayer "emma" <|
+            withPlayer emma <|
                 \emma ->
-                    join { room = "dabest", player = "Pierre" }
-                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
-                        |> simulateIncomingPort Ports.votesIn (Vote.json (Vote.Vote emma.id <| Just <| Card.fromString "TFB"))
+                    join { room = "dabest", player = playerNamed "Pierre" }
+                        |> simulateIncomingPort Test.Ports.playersIn (Player.json emma)
+                        |> simulateIncomingPort Test.Ports.votesIn (Vote.json (Vote.Vote emma.id <| Just <| Card.fromString "TFB"))
                         |> clickButton "Reveal"
                         |> ensureViewHas
                             [ Selector.class "card-slot"
@@ -208,34 +209,34 @@ peerActions =
                             ]
                         |> done
         , test "Emma revealed the cards" <|
-            withPlayer "emma" <|
+            withPlayer emma <|
                 \emma ->
-                    join { room = "dabest", player = "Pierre" }
-                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
-                        |> simulateIncomingPort Ports.votesIn (Vote.json (Vote.Vote emma.id <| Just <| Card.fromString "TFB"))
-                        |> simulateIncomingPort Ports.statesIn (GameState.json GameState.Chosen)
+                    join { room = "dabest", player = playerNamed "Pierre" }
+                        |> simulateIncomingPort Test.Ports.playersIn (Player.json emma)
+                        |> simulateIncomingPort Test.Ports.votesIn (Vote.json (Vote.Vote emma.id <| Just <| Card.fromString "TFB"))
+                        |> simulateIncomingPort Test.Ports.statesIn (GameState.json GameState.Chosen)
                         |> ensureViewHas
                             [ Selector.class "card-slot"
                             , Selector.containing [ Selector.text "TFB" ]
                             ]
                         |> done
         , test "Emma restarted the game, the votes are reset" <|
-            withPlayer "emma" <|
+            withPlayer emma <|
                 \emma ->
-                    join { room = "dabest", player = "Pierre" }
+                    join { room = "dabest", player = playerNamed "Pierre" }
                         |> clickButton "1"
-                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
-                        |> simulateIncomingPort Ports.votesIn (Vote.json (Vote.Vote emma.id <| Just <| Card.fromString "TFB"))
-                        |> simulateIncomingPort Ports.statesIn (GameState.json GameState.Chosen)
-                        |> simulateIncomingPort Ports.statesIn (GameState.json GameState.Choosing)
+                        |> simulateIncomingPort Test.Ports.playersIn (Player.json emma)
+                        |> simulateIncomingPort Test.Ports.votesIn (Vote.json (Vote.Vote emma.id <| Just <| Card.fromString "TFB"))
+                        |> simulateIncomingPort Test.Ports.statesIn (GameState.json GameState.Chosen)
+                        |> simulateIncomingPort Test.Ports.statesIn (GameState.json GameState.Choosing)
                         |> ensureNoCardIsSelected
                         |> done
         , test "Emma left" <|
-            withPlayer "emma" <|
+            withPlayer emma <|
                 \emma ->
-                    join { room = "dabest", player = "Pierre" }
-                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
-                        |> simulateIncomingPort Ports.playerLeft (PlayerId.json emma.id)
+                    join { room = "dabest", player = playerNamed "Pierre" }
+                        |> simulateIncomingPort Test.Ports.playersIn (Player.json emma)
+                        |> simulateIncomingPort Test.Ports.playerLeft (PlayerId.json emma.id)
                         |> ensureViewHasNot
                             [ Selector.all
                                 [ Selector.class "card-slot"
@@ -244,14 +245,14 @@ peerActions =
                             ]
                         |> done
         , test "Messages saying that you left are ignored - we never want you to disappear" <|
-            withPlayer "Pierre" <|
+            withPlayer pierre <|
                 \me ->
-                    join { room = "dabest", player = Nickname.print me.nickname }
+                    join { room = "dabest", player = me }
                         |> ensureViewHas
                             [ Selector.class "card-slot"
                             , Selector.containing [ Selector.text <| Nickname.print me.nickname ]
                             ]
-                        |> simulateIncomingPort Ports.playerLeft (PlayerId.json me.id)
+                        |> simulateIncomingPort Test.Ports.playerLeft (PlayerId.json me.id)
                         |> ensureViewHas
                             [ Selector.all
                                 [ Selector.class "card-slot"
@@ -260,12 +261,12 @@ peerActions =
                             ]
                         |> done
         , test "emma left then joined again" <|
-            withPlayer "Emma" <|
+            withPlayer emma <|
                 \emma ->
-                    join { room = "dabest", player = "Pierre" }
-                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
-                        |> simulateIncomingPort Ports.playerLeft (PlayerId.json emma.id)
-                        |> simulateIncomingPort Ports.playersIn (Player.json emma)
+                    join { room = "dabest", player = playerNamed "Pierre" }
+                        |> simulateIncomingPort Test.Ports.playersIn (Player.json emma)
+                        |> simulateIncomingPort Test.Ports.playerLeft (PlayerId.json emma.id)
+                        |> simulateIncomingPort Test.Ports.playersIn (Player.json emma)
                         |> ensureViewHas
                             [ Selector.class "card-slot"
                             , Selector.containing [ Selector.text <| Nickname.print emma.nickname ]
@@ -318,7 +319,7 @@ initialDisplay =
                         ]
     , test "displays the deck of the player" <|
         \_ ->
-            join { room = "dabest", player = "Joba" }
+            join { room = "dabest", player = playerNamed "Joba" }
                 |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "1" ] ] ]
                 |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "TFB" ] ] ]
                 |> ensureViewHas [ Selector.all [ Selector.id "my-deck", Selector.containing [ Selector.text "NFC" ] ] ]
@@ -326,7 +327,7 @@ initialDisplay =
                 |> done
     , test "displays a card slot for the player" <|
         \_ ->
-            join { room = "dabest", player = "Joba" }
+            join { room = "dabest", player = playerNamed "Joba" }
                 |> ensureViewHas
                     [ Selector.class "card-slot"
                     , Selector.containing [ Selector.text "Joba" ]
@@ -335,12 +336,12 @@ initialDisplay =
     ]
 
 
-join : { a | room : String, player : String } -> ProgramTest (Main.Model ()) Main.Msg Effect
+join : { a | room : String, player : Player } -> ProgramTest (Main.Model ()) Main.Msg Effect
 join { room, player } =
     startAppOn Routes.Home
-        |> withAPlayerId
+        |> withPlayerId player.id
         |> writeInField { id = "room", label = "Room", value = room }
-        |> writeInField { id = "nickname", label = "Nickname", value = player }
+        |> writeInField { id = "nickname", label = "Nickname", value = Nickname.print player.nickname }
         |> clickButton "Join"
 
 
