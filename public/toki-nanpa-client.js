@@ -14,13 +14,14 @@ export const onDM = (cbck) => dmCbck = cbck;
 export const onPeerLeft = (cbck) => leftCbck = cbck;
 export const onPeerJoined = (cbck) => joinedCbck = cbck;
 
-export const connect = (onConnection = noop) => {
+export const connect = ({onConnect, onDisconnect}) => {
     socket = io("https://toki-nanpa.onrender.com");
     socket.on('connect', () => {
         console.debug('connected', socket.id);
         me = socket.id;
-        return onConnection(socket.id);
+        return onConnect(socket.id);
     });
+    socket.on('disconnect', onDisconnect);
 
     socket.on('message', (msg) => {
         console.log('   IN ',{ ...msg });

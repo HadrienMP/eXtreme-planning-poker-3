@@ -67,12 +67,9 @@ update shared msg model =
             , effect =
                 Effect.batch
                     [ Effect.pushRoute <| Routes.Room room
-                    , case updated of
-                        Shared.Ready { player } ->
-                            Effect.sharePlayer room player
-
-                        _ ->
-                            Effect.none
+                    , Shared.getPlayer updated
+                        |> Maybe.map (Effect.sharePlayer room)
+                        |> Maybe.withDefault Effect.none
                     ]
             }
 
@@ -95,12 +92,9 @@ view shared model =
                     |> featherIconToElement { shadow = True }
             , size = Just 10
             }
-        , case shared of
-            Shared.SettingUp setupModel ->
-                Shared.view setupModel |> Element.map GotSharedMsg
-
-            _ ->
-                Element.none
+        , Shared.getIncomplete shared
+            |> Maybe.map (Shared.view >> Element.map GotSharedMsg)
+            |> Maybe.withDefault Element.none
         , Theme.Input.buttonWithIcon
             { onPress =
                 model.room

@@ -4,7 +4,7 @@ import AssocList as Dict exposing (Dict)
 import Domain.Card exposing (Card)
 import Domain.GameState as GameState exposing (GameState(..))
 import Domain.Nickname exposing (Nickname)
-import Domain.Player as Player
+import Domain.Player as Player exposing (Player)
 import Domain.PlayerId as PlayerId exposing (PlayerId)
 import Domain.RoomName exposing (RoomName)
 import Domain.Vote as Vote exposing (Vote)
@@ -85,22 +85,16 @@ update shared msg model =
             { model = { model | players = addPlayer updated model.players }
             , shared = updated
             , effect =
-                case updated of
-                    Shared.Ready { player } ->
-                        Effect.sharePlayer model.room player
-
-                    _ ->
-                        Effect.none
+                Shared.getPlayer updated
+                    |> Maybe.map (Effect.sharePlayer model.room)
+                    |> Maybe.withDefault Effect.none
             }
 
         Voted vote ->
             { model =
-                case shared of
-                    Shared.Ready { player } ->
-                        { model | votes = Dict.update player.id (\_ -> vote.card) model.votes }
-
-                    _ ->
-                        model
+                Shared.getPlayer shared
+                    |> Maybe.map (\player -> { model | votes = Dict.update player.id (\_ -> vote.card) model.votes })
+                    |> Maybe.withDefault model
             , shared = shared
             , effect = Effect.shareVote model.room vote
             }
@@ -258,18 +252,17 @@ iconOf card =
 
 view : Shared.Model -> Model -> Element Msg
 view shared model =
-    case shared of
-        Shared.SettingUp setupModel ->
+    Shared.match shared
+        (\setupModel ->
             column [ pageWidth, spacing 30 ]
                 [ title model
                 , setupView setupModel
                 ]
+        )
+        (\player -> playingView player model)
 
-        Shared.Ready ready ->
-            playingView ready model
 
-
-playingView : Shared.Complete -> Model -> Element Msg
+playingView : Player -> Model -> Element Msg
 playingView shared model =
     column [ spacing 30, pageWidth ]
         [ el (Theme.Theme.bottomBorder ++ [ width fill ]) <| title model
@@ -320,8 +313,8 @@ displayCardSlot state data =
         ]
 
 
-displayDeck : Model -> Shared.Complete -> Element Msg
-displayDeck model shared =
+displayDeck : Model -> Player -> Element Msg
+displayDeck model player =
     case model.state of
         Choosing ->
             column
@@ -338,22 +331,22 @@ displayDeck model shared =
                     , paddingEach { emptySides | bottom = 12 }
                     ]
                     [ FeatherIcons.user |> featherIconToElement { shadow = True }
-                    , ellipsisText [ clipX, Font.bold ] <| Domain.Nickname.print shared.player.nickname
+                    , ellipsisText [ clipX, Font.bold ] <| Domain.Nickname.print player.nickname
                     ]
-                , displayDeckCards (Dict.get shared.player.id model.votes) shared
+                , displayDeckCards (Dict.get player.id model.votes) player
                 ]
 
         Chosen ->
             none
 
 
-displayDeckCards : Maybe Card -> Shared.Complete -> Element Msg
-displayDeckCards selected shared =
-    row [ spacing 10, centerX ] <| List.indexedMap (displayCard selected shared) <| List.reverse <| deck
+displayDeckCards : Maybe Card -> Player -> Element Msg
+displayDeckCards selected player =
+    row [ spacing 10, centerX ] <| List.indexedMap (displayCard selected player) <| List.reverse <| deck
 
 
-displayCard : Maybe Card -> Shared.Complete -> Int -> Card -> Element Msg
-displayCard selected shared _ card =
+displayCard : Maybe Card -> Player -> Int -> Card -> Element Msg
+displayCard selected player _ card =
     el
         [ rotate <|
             if Just card == selected then
@@ -371,7 +364,7 @@ displayCard selected shared _ card =
     <|
         if Just card == selected then
             Input.button [ moveUp 8, class "selected" ]
-                { onPress = Vote shared.player.id Maybe.Nothing |> Voted |> Just
+                { onPress = Vote player.id Maybe.Nothing |> Voted |> Just
                 , label = Theme.Card.front { label = Domain.Card.print card, icon = iconOf card }
                 }
 
@@ -384,7 +377,7 @@ displayCard selected shared _ card =
                     else
                         0.95
                 ]
-                { onPress = Just <| Voted <| Vote shared.player.id (Just card)
+                { onPress = Just <| Voted <| Vote player.id (Just card)
                 , label = Theme.Card.front { label = Domain.Card.print card, icon = iconOf card }
                 }
 

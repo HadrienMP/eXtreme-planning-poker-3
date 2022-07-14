@@ -167,7 +167,7 @@ view model =
         [ layout <|
             column [ width fill, height fill ]
                 [ el [ pageWidth, centerX, centerY ] <| displayPage model
-                , if Shared.hasPlayerId model.shared then
+                , if model.shared.connected then
                     none
 
                   else

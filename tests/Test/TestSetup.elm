@@ -61,6 +61,14 @@ withPlayerId playerId test =
         test
 
 
+gotDisconnected : ProgramTest (Main.Model ()) Main.Msg Effect -> ProgramTest (Main.Model ()) Main.Msg Effect
+gotDisconnected test =
+    simulateIncomingPort
+        Test.Ports.disconnected
+        Json.Encode.null
+        test
+
+
 simulateEffects : Effect -> ProgramTest.SimulatedEffect Main.Msg
 simulateEffects effect =
     case effect of
@@ -111,6 +119,9 @@ simulateSubscriptions _ =
         , SimulatedEffect.Ports.subscribe Test.Ports.playerIdIn
             Json.Decode.value
             (Main.GotRoomMsg << Pages.Room.GotPlayerId)
+        , SimulatedEffect.Ports.subscribe Test.Ports.disconnected
+            Json.Decode.value
+            (Main.GotSharedMsg << Shared.GotDisconnected)
         , SimulatedEffect.Ports.subscribe Test.Ports.playersIn
             Json.Decode.value
             (Main.GotRoomMsg << Pages.Room.GotPlayer)

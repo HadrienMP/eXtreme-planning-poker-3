@@ -71,6 +71,11 @@ playerIdIn =
     "playerIdIn"
 
 
+disconnected : String
+disconnected =
+    "disconnected"
+
+
 ensureStatesOut : List GameState -> ProgramTest model msg effect -> ProgramTest model msg effect
 ensureStatesOut states =
     ensureOutgoingPortValues

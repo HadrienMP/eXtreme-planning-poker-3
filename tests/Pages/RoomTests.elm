@@ -49,26 +49,68 @@ setup =
                 join { room = "dabest", player = pierre }
                     |> ensurePlayerOut pierre
                     |> done
-    , test "display a loader when the player id is not defined" <|
-        inRoom "dabest" <|
-            \room ->
-                startAppOn room
-                    |> ensureViewHas [ Selector.id "loader" ]
-                    |> done
-    , test "send the player data out after getting an id again -  to handle network disconnect and reconnect" <|
-        withMaybe pierre <|
-            \pierre ->
-                join { room = "dabest", player = pierre }
-                    |> withPlayerId pierre.id
-                    |> ensurePlayerOutTimes 2 pierre
-                    |> done
-    , test "playerIds change after disconnections" <|
-        withMaybe2 ( PlayerId.create "another-id", playerNamed "Pierre" ) <|
-            \( anotherId, pierre ) ->
-                join { room = "dabest", player = pierre }
-                    |> withPlayerId anotherId
-                    |> ensurePlayersOut [ pierre, { pierre | id = anotherId } ]
-                    |> done
+    , describe "connection/disconnection"
+        [ describe "loader"
+            [ describe "When setting up"
+                [ test "display a loader when the player id is not defined" <|
+                    inRoom "dabest" <|
+                        \room ->
+                            startAppOn room
+                                |> ensureViewHas [ Selector.id "loader" ]
+                                |> done
+                , test "display a loader when got disconnected" <|
+                    inRoom "dabest" <|
+                        \room ->
+                            startAppOn room
+                                |> withAPlayerId
+                                |> gotDisconnected
+                                |> ensureViewHas [ Selector.id "loader" ]
+                                |> done
+                , test "loader disappears when connection comes back" <|
+                    inRoom "dabest" <|
+                        \room ->
+                            startAppOn room
+                                |> withAPlayerId
+                                |> gotDisconnected
+                                |> withAPlayerId
+                                |> ensureViewHasNot [ Selector.id "loader" ]
+                                |> done
+                ]
+            , describe "When Ready"
+                [ test "display a loader when got disconnected" <|
+                    withMaybe pierre <|
+                        \pierre ->
+                            join { room = "dabest", player = pierre }
+                                |> gotDisconnected
+                                |> ensureViewHas [ Selector.id "loader" ]
+                                |> done
+                , test "loader disappears when connection comes back" <|
+                    withMaybe pierre <|
+                        \pierre ->
+                            join { room = "dabest", player = pierre }
+                                |> gotDisconnected
+                                |> withAPlayerId
+                                |> ensureViewHasNot [ Selector.id "loader" ]
+                                |> done
+                ]
+            ]
+        , describe "playerOut"
+            [ test "send the player data out after getting an id again -  to handle network disconnect and reconnect" <|
+                withMaybe pierre <|
+                    \pierre ->
+                        join { room = "dabest", player = pierre }
+                            |> withPlayerId pierre.id
+                            |> ensurePlayerOutTimes 2 pierre
+                            |> done
+            , test "playerIds change after disconnections" <|
+                withMaybe2 ( PlayerId.create "another-id", playerNamed "Pierre" ) <|
+                    \( anotherId, pierre ) ->
+                        join { room = "dabest", player = pierre }
+                            |> withPlayerId anotherId
+                            |> ensurePlayersOut [ pierre, { pierre | id = anotherId } ]
+                            |> done
+            ]
+        ]
     ]
 
 

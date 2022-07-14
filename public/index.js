@@ -4,7 +4,10 @@ import * as peerProtocol from './peer-protocol';
 
 const app = Elm.Main.init();
 
-tokiNanpa.connect(app.ports.playerIdIn.send);
+tokiNanpa.connect({
+    onConnect: app.ports.playerIdIn.send,
+    onDisconnect: () => app.ports.disconnected.send({})
+});
 
 app.ports.playerOut.subscribe(playerOutMsg => {
     const room = peerProtocol.join(playerOutMsg.room, tokiNanpa, {

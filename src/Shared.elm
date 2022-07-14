@@ -1,9 +1,8 @@
-module Shared exposing (..)
+port module Shared exposing (Incomplete, Model, Msg(..), getIncomplete, getPlayer, getPlayerId, init, match, subscriptions, update, view)
 
 import Domain.Nickname
 import Domain.Player exposing (Player)
 import Domain.PlayerId as PlayerId exposing (PlayerId)
-import Effect exposing (Effect)
 import Element exposing (Element)
 import FeatherIcons
 import Json.Decode
@@ -11,9 +10,12 @@ import Theme.Input
 import Theme.Theme exposing (featherIconToElement)
 
 
+port disconnected : (Json.Decode.Value -> msg) -> Sub msg
+
+
 
 --
--- Init
+-- Model
 --
 
 
@@ -23,28 +25,45 @@ type alias Incomplete =
     }
 
 
-type alias Complete =
-    { player : Player }
+type Readyness
+    = Ready Player
+    | NotReady Incomplete
 
 
-type Model
-    = SettingUp Incomplete
-    | Ready Complete
+type alias Model =
+    { readyness : Readyness
+    , connected : Bool
+    }
 
 
-getComplete : Model -> Maybe Complete
-getComplete model =
-    case model of
-        SettingUp _ ->
+match : Model -> (Incomplete -> a) -> (Player -> a) -> a
+match model f g =
+    case model.readyness of
+        Ready player ->
+            g player
+
+        NotReady incomplete ->
+            f incomplete
+
+
+getIncomplete : Model -> Maybe Incomplete
+getIncomplete model =
+    case model.readyness of
+        Ready _ ->
             Nothing
 
-        Ready complete ->
-            Just complete
+        NotReady incomplete ->
+            Just incomplete
 
 
 getPlayer : Model -> Maybe Player
-getPlayer =
-    getComplete >> Maybe.map .player
+getPlayer model =
+    case model.readyness of
+        Ready player ->
+            Just player
+
+        _ ->
+            Nothing
 
 
 getPlayerId : Model -> Maybe PlayerId
@@ -52,19 +71,15 @@ getPlayerId =
     getPlayer >> Maybe.map .id
 
 
-hasPlayerId : Model -> Bool
-hasPlayerId model =
-    case model of
-        Ready _ ->
-            True
 
-        SettingUp incomplete ->
-            incomplete.playerId /= Nothing
+--
+-- Init
+--
 
 
 init : Model
 init =
-    SettingUp { nickname = "", playerId = Nothing }
+    { readyness = NotReady { nickname = "", playerId = Nothing }, connected = False }
 
 
 
@@ -76,49 +91,67 @@ init =
 type Msg
     = UpdateNickName String
     | GotPlayerId Json.Decode.Value
+    | GotDisconnected Json.Decode.Value
     | Validate
 
 
 update : Msg -> Model -> Model
 update msg model =
-    case model of
-        SettingUp subModel ->
+    case model.readyness of
+        NotReady subModel ->
             case msg of
                 UpdateNickName nickname ->
-                    SettingUp { subModel | nickname = nickname }
+                    { model | readyness = NotReady { subModel | nickname = nickname } }
 
                 GotPlayerId json ->
                     PlayerId.decode json
-                        |> (\it -> SettingUp { subModel | playerId = it })
+                        |> (\it -> { model | readyness = NotReady { subModel | playerId = it }, connected = True })
 
                 Validate ->
                     case ( Domain.Nickname.create subModel.nickname, subModel.playerId ) of
                         ( Just nickname, Just playerId ) ->
-                            Ready { player = { nickname = nickname, id = playerId } }
+                            { model | readyness = Ready { nickname = nickname, id = playerId } }
 
                         _ ->
                             model
 
-        Ready { player } ->
+                GotDisconnected _ ->
+                    { model | connected = False }
+
+        Ready player ->
             case msg of
                 GotPlayerId json ->
                     PlayerId.decode json
                         |> Maybe.map (\id -> { player | id = id })
-                        |> Maybe.map (\updated -> Ready { player = updated })
+                        |> Maybe.map Ready
+                        |> Maybe.map (\jojo -> { model | readyness = jojo, connected = True })
                         |> Maybe.withDefault model
+
+                GotDisconnected _ ->
+                    { model | connected = False }
 
                 _ ->
                     model
 
 
-noCmd : Model -> ( Model, Effect )
-noCmd model =
-    ( model, Effect.none )
+
+--
+-- Subscriptions
+--
 
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    PlayerId.playerIdIn GotPlayerId
+    Sub.batch
+        [ PlayerId.playerIdIn GotPlayerId
+        , disconnected GotDisconnected
+        ]
+
+
+
+--
+-- View
+--
 
 
 view : Incomplete -> Element Msg
