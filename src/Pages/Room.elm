@@ -191,16 +191,18 @@ update shared msg model =
                     }
 
         GotPlayerId json ->
-            { model = model
-            , shared = shared
-            , effect =
-                case ( PlayerId.decode json, Shared.getPlayer shared ) of
-                    ( Just _, Just player ) ->
-                        Effect.sharePlayer model.room player
+            case ( PlayerId.decode json, Shared.getPlayer shared ) of
+                ( Just id, Just player ) ->
+                    { model = model
+                    , shared = shared
+                    , effect = Effect.sharePlayer model.room { player | id = id }
+                    }
 
-                    _ ->
-                        Effect.none
-            }
+                _ ->
+                    { model = model
+                    , shared = shared
+                    , effect = Effect.none
+                    }
 
 
 addPlayer : Shared.Model -> Dict PlayerId Nickname -> Dict PlayerId Nickname

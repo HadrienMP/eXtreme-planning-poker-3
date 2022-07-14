@@ -19,9 +19,13 @@ ensurePlayerOut =
 
 ensurePlayerOutTimes : Int -> Player -> ProgramTest model msg effect -> ProgramTest model msg effect
 ensurePlayerOutTimes times player =
+    ensurePlayersOut <| List.repeat times player
+
+
+ensurePlayersOut : List Player -> ProgramTest model msg effect -> ProgramTest model msg effect
+ensurePlayersOut players =
     ensureOutgoingPortValues playerOut Player.decoder <|
-        Expect.equal <|
-            List.repeat times player
+        Expect.equal players
 
 
 playersIn : String

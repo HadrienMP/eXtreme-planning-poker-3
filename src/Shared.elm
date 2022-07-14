@@ -3,6 +3,7 @@ module Shared exposing (..)
 import Domain.Nickname
 import Domain.Player exposing (Player)
 import Domain.PlayerId as PlayerId exposing (PlayerId)
+import Effect exposing (Effect)
 import Element exposing (Element)
 import FeatherIcons
 import Json.Decode
@@ -98,8 +99,21 @@ update msg model =
                         _ ->
                             model
 
-        Ready _ ->
-            model
+        Ready { player } ->
+            case msg of
+                GotPlayerId json ->
+                    PlayerId.decode json
+                        |> Maybe.map (\id -> { player | id = id })
+                        |> Maybe.map (\updated -> Ready { player = updated })
+                        |> Maybe.withDefault model
+
+                _ ->
+                    model
+
+
+noCmd : Model -> ( Model, Effect )
+noCmd model =
+    ( model, Effect.none )
 
 
 subscriptions : Model -> Sub Msg

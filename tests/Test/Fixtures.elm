@@ -5,21 +5,21 @@ import Domain.Player exposing (Player)
 import Domain.PlayerId as PlayerId
 
 
-pierre : Player
+pierre : Maybe Player
 pierre =
     playerNamed "Pierre"
 
 
-emma : Player
+emma : Maybe Player
 emma =
     playerNamed "Emma"
 
 
-playerNamed : String -> Player
+playerNamed : String -> Maybe Player
 playerNamed name =
     case ( PlayerId.create <| "id-of-" ++ name, Nickname.create name ) of
         ( Just playerId, Just nickname ) ->
-            Player playerId nickname
+            Just <| Player playerId nickname
 
         _ ->
-            Debug.todo "playerNamed fixture should not crash"
+            Nothing
