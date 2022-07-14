@@ -58,6 +58,7 @@ init shared room =
 type Msg
     = GotSharedMsg Shared.Msg
     | GotPlayer Decode.Value
+    | GotPlayerId Decode.Value
     | GotVote Decode.Value
     | GotState Decode.Value
     | PlayerLeft Decode.Value
@@ -189,6 +190,18 @@ update shared msg model =
                     , effect = Effect.error <| Decode.errorToString error
                     }
 
+        GotPlayerId json ->
+            { model = model
+            , shared = shared
+            , effect =
+                case ( PlayerId.decode json, Shared.getPlayer shared ) of
+                    ( Just _, Just player ) ->
+                        Effect.sharePlayer model.room player
+
+                    _ ->
+                        Effect.none
+            }
+
 
 addPlayer : Shared.Model -> Dict PlayerId Nickname -> Dict PlayerId Nickname
 addPlayer shared players =
@@ -210,6 +223,7 @@ subscriptions _ =
         , Vote.votesIn GotVote
         , GameState.statesIn GotState
         , Player.playerLeft PlayerLeft
+        , PlayerId.playerIdIn GotPlayerId
         ]
 
 

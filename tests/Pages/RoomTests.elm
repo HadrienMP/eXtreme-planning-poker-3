@@ -44,16 +44,23 @@ setup =
                     |> ensurePlayerOut (Player.Player id nickname)
                     |> done
     , test "share the player's identity when they initialize the room also" <|
-        withMaybe2 ( PlayerId.create "emma-id", Nickname.create "Emma" ) <|
-            \( id, nickname ) ->
-                joinWithPlayerId { room = "dabest", player = { nickname = Nickname.print nickname, id = id } }
-                    |> ensurePlayerOut (Player.Player id nickname)
+        withPlayer (playerNamed "Pierre") <|
+            \pierre ->
+                join { room = "dabest", player = pierre }
+                    |> ensurePlayerOut pierre
                     |> done
     , test "display a loader when the player id is not defined" <|
         inRoom "dabest" <|
             \room ->
                 startAppOn room
                     |> ensureViewHas [ Selector.id "loader" ]
+                    |> done
+    , test "send the player data out after getting an id again" <|
+        withPlayer (playerNamed "Pierre") <|
+            \pierre ->
+                join { room = "dabest", player = pierre }
+                    |> withPlayerId pierre.id
+                    |> ensurePlayerOutTimes 2 pierre
                     |> done
     ]
 

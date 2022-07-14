@@ -62,6 +62,11 @@ statesIn =
     "statesIn"
 
 
+playerIdIn : String
+playerIdIn =
+    "playerIdIn"
+
+
 ensureStatesOut : List GameState -> ProgramTest model msg effect -> ProgramTest model msg effect
 ensureStatesOut states =
     ensureOutgoingPortValues

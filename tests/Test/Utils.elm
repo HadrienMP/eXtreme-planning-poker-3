@@ -1,8 +1,6 @@
 module Test.Utils exposing (..)
 
-import Domain.Nickname as Nickname
 import Domain.Player exposing (Player)
-import Domain.PlayerId as PlayerId
 import Domain.RoomName
 import Expect
 import Routes

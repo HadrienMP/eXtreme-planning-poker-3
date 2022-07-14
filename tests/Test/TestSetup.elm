@@ -45,7 +45,7 @@ startAppOn route =
 withAPlayerId : ProgramTest (Main.Model ()) Main.Msg Effect -> ProgramTest (Main.Model ()) Main.Msg Effect
 withAPlayerId test =
     test
-        |> simulateIncomingPort "playerId"
+        |> simulateIncomingPort Test.Ports.playerIdIn
             ("playerId-1234"
                 |> NonEmptyString.create
                 |> Maybe.map NonEmptyString.json
@@ -56,7 +56,7 @@ withAPlayerId test =
 withPlayerId : PlayerId -> ProgramTest (Main.Model ()) Main.Msg Effect -> ProgramTest (Main.Model ()) Main.Msg Effect
 withPlayerId playerId test =
     simulateIncomingPort
-        "playerId"
+        Test.Ports.playerIdIn
         (PlayerId.json playerId)
         test
 
@@ -105,9 +105,12 @@ simulateAtomicEffects effect =
 simulateSubscriptions : Main.Model () -> ProgramTest.SimulatedSub Main.Msg
 simulateSubscriptions _ =
     SimulatedEffect.Sub.batch
-        [ SimulatedEffect.Ports.subscribe "playerId"
+        [ SimulatedEffect.Ports.subscribe Test.Ports.playerIdIn
             Json.Decode.value
             (Main.GotSharedMsg << Shared.GotPlayerId)
+        , SimulatedEffect.Ports.subscribe Test.Ports.playerIdIn
+            Json.Decode.value
+            (Main.GotRoomMsg << Pages.Room.GotPlayerId)
         , SimulatedEffect.Ports.subscribe Test.Ports.playersIn
             Json.Decode.value
             (Main.GotRoomMsg << Pages.Room.GotPlayer)

@@ -1,4 +1,4 @@
-port module Shared exposing (..)
+module Shared exposing (..)
 
 import Domain.Nickname
 import Domain.Player exposing (Player)
@@ -8,9 +8,6 @@ import FeatherIcons
 import Json.Decode
 import Theme.Input
 import Theme.Theme exposing (featherIconToElement)
-
-
-port playerIdPort : (Json.Decode.Value -> msg) -> Sub msg
 
 
 
@@ -90,9 +87,7 @@ update msg model =
                     SettingUp { subModel | nickname = nickname }
 
                 GotPlayerId json ->
-                    json
-                        |> Json.Decode.decodeValue PlayerId.decoder
-                        |> Result.toMaybe
+                    PlayerId.decode json
                         |> (\it -> SettingUp { subModel | playerId = it })
 
                 Validate ->
@@ -109,7 +104,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    playerIdPort GotPlayerId
+    PlayerId.playerIdIn GotPlayerId
 
 
 view : Incomplete -> Element Msg

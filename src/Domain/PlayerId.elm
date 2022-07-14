@@ -1,8 +1,11 @@
-module Domain.PlayerId exposing (..)
+port module Domain.PlayerId exposing (..)
 
 import Json.Decode as Decode
 import Json.Encode as Json
 import Lib.NonEmptyString as NES exposing (NonEmptyString)
+
+
+port playerIdIn : (Decode.Value -> msg) -> Sub msg
 
 
 type PlayerId
@@ -29,6 +32,13 @@ print =
 json : PlayerId -> Json.Value
 json =
     getValue >> NES.json
+
+
+decode : Decode.Value -> Maybe PlayerId
+decode it =
+    it
+        |> Decode.decodeValue decoder
+        |> Result.toMaybe
 
 
 decoder : Decode.Decoder PlayerId
